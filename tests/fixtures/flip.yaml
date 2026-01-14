@@ -1,0 +1,17 @@
+# Flip card (Kamigawa-style)
+name: "Akki Lavarunner"
+type: flip
+rarity: rare
+faces:
+  - name: "Akki Lavarunner"
+    mana_cost: "{3}{R}"
+    type_line: "Creature — Goblin Warrior"
+    rules_text: "Haste\nWhenever Akki Lavarunner deals damage to an opponent, flip it."
+    power: "1"
+    toughness: "1"
+  - name: "Tok-Tok, Volcano Born"
+    type_line: "Legendary Creature — Goblin Shaman"
+    rules_text: "Protection from red\nIf a red source would deal damage to a player, it deals that much damage plus 1 to that player instead."
+    power: "2"
+    toughness: "2"
+    color_indicator: ["red"]

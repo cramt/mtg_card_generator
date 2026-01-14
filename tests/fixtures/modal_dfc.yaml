@@ -1,0 +1,13 @@
+# Modal DFC card
+name: "Emeria's Call"
+type: modal_dfc
+rarity: mythic
+faces:
+  - name: "Emeria's Call"
+    mana_cost: "{4}{W}{W}{W}"
+    type_line: "Sorcery"
+    rules_text: "Create two 4/4 white Angel Warrior creature tokens with flying. Non-Angel creatures you control gain indestructible until your next turn."
+  - name: "Emeria, Shattered Skyclave"
+    type_line: "Land"
+    rules_text: "As Emeria, Shattered Skyclave enters the battlefield, you may pay 3 life. If you don't, it enters the battlefield tapped.\n{T}: Add {W}."
+    color_indicator: []

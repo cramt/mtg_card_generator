@@ -1,0 +1,15 @@
+# Class card
+name: "Ranger Class"
+mana_cost: "{1}{G}"
+type_line: "Enchantment — Class"
+rarity: rare
+type: class
+levels:
+  - level: 1
+    text: "When Ranger Class enters the battlefield, create a 2/2 green Wolf creature token."
+  - level: 2
+    cost: "{1}{G}"
+    text: "Whenever you attack, put a +1/+1 counter on target attacking creature."
+  - level: 3
+    cost: "{1}{G}"
+    text: "You may look at the top card of your library any time. You may cast creature spells from the top of your library."

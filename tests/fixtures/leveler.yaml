@@ -1,0 +1,19 @@
+# Leveler card
+name: "Kargan Dragonlord"
+mana_cost: "{R}{R}"
+type_line: "Creature — Human Warrior"
+rarity: mythic
+type: leveler
+rules_text: "Level up {R}"
+leveler_ranges:
+  - range: [0, 3]
+    power: "2"
+    toughness: "2"
+  - range: [4, 7]
+    power: "4"
+    toughness: "4"
+    text: "Flying"
+  - range: [8, null]
+    power: "8"
+    toughness: "8"
+    text: "Flying, trample\n{R}: Kargan Dragonlord gets +1/+0 until end of turn."

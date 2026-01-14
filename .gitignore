@@ -1,0 +1,15 @@
+/target
+/output
+*.png
+*.jpg
+*.jpeg
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

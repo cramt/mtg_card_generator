@@ -1,0 +1,14 @@
+# Adventure card
+name: "Bonecrusher Giant"
+mana_cost: "{2}{R}"
+type_line: "Creature — Giant"
+rules_text: "Whenever Bonecrusher Giant becomes the target of a spell, Bonecrusher Giant deals 2 damage to that spell's controller."
+power: "4"
+toughness: "3"
+rarity: rare
+type: adventure
+adventure:
+  name: "Stomp"
+  mana_cost: "{1}{R}"
+  type_line: "Instant — Adventure"
+  rules_text: "Damage can't be prevented this turn. Stomp deals 2 damage to any target."

@@ -1,0 +1,33 @@
+[package]
+name = "mtg-gen"
+version = "0.1.0"
+edition = "2024"
+description = "CLI tool for generating Magic: The Gathering card images from YAML definitions"
+license = "MIT"
+repository = "https://github.com/cramt/mtg_card_generator"
+
+[dependencies]
+# Facet - reflection-based serialization and CLI
+facet = "0.42"
+facet-yaml = "0.42"
+facet-args = "0.42"
+
+# HTML templating
+maud = "0.27"
+
+# Browser automation
+chromiumoxide = { version = "0.8", features = ["tokio-runtime"], default-features = false }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Utilities
+walkdir = "2"
+
+[dev-dependencies]
+tempfile = "3"

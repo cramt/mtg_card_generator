@@ -1,0 +1,17 @@
+# Transform DFC card
+name: "Delver of Secrets"
+type: transform
+rarity: common
+faces:
+  - name: "Delver of Secrets"
+    mana_cost: "{U}"
+    type_line: "Creature — Human Wizard"
+    rules_text: "At the beginning of your upkeep, look at the top card of your library. You may reveal that card. If an instant or sorcery card is revealed this way, transform Delver of Secrets."
+    power: "1"
+    toughness: "1"
+  - name: "Insectile Aberration"
+    type_line: "Creature — Human Insect"
+    rules_text: "Flying"
+    power: "3"
+    toughness: "2"
+    color_indicator: ["blue"]

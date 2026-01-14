@@ -1,0 +1,161 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.card {
+    width: 375px;
+    height: 525px;
+    border: 1px solid black;
+    border-radius: 18px;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Beleren Small Caps', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #555;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.mana-cost-container {
+    display: flex;
+    gap: 2px;
+}
+
+.mana-symbol {
+    width: 18px;
+    height: 18px;
+    box-shadow: -1px 1px 1px rgba(0,0,0,0.5);
+    border-radius: 50%;
+}
+
+.mana-generic {
+    background: #ccc;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: black;
+    font-weight: bold;
+    box-shadow: -1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.type_line {
+    margin-top: 250px; /* Placeholder for art area */
+    border: 2px solid #555;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.rules_box {
+    margin-top: 10px;
+    flex-grow: 1;
+    border: 2px solid #555;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.rules_text {
+    white-space: pre-wrap;
+    font-size: 0.9em;
+    flex-grow: 1;
+}
+
+.rules-text-inner .mana-symbol {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin: 0 1px;
+}
+
+.flavor_text {
+    margin-top: 5px;
+    font-style: italic;
+    font-size: 0.8em;
+    border-top: 1px solid #aaa;
+    padding-top: 5px;
+}
+
+.pt {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #555;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Planeswalker specific */
+.loyalty_box {
+    margin-top: 10px;
+    flex-grow: 1;
+    border: 2px solid #555;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.loyalty_ability {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 5px;
+}
+
+.loyalty_ability:last-child {
+    border-bottom: none;
+}
+
+.loyalty_cost {
+    background: #555;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    min-width: 30px;
+    text_align: center;
+    font-weight: bold;
+}
+
+.loyalty_text {
+    font-size: 0.85em;
+}
+
+.starting_loyalty {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #555;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+}

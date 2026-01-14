@@ -1,0 +1,13 @@
+# Prototype card
+name: "Phyrexian Fleshgorger"
+mana_cost: "{7}"
+type_line: "Artifact Creature — Phyrexian Wurm"
+type: prototype
+rarity: mythic
+rules_text: "Menace, lifelink\nWard—Pay life equal to Phyrexian Fleshgorger's power."
+power: "7"
+toughness: "5"
+prototype:
+  mana_cost: "{1}{B}{B}"
+  power: "3"
+  toughness: "3"

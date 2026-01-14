@@ -1,0 +1,13 @@
+# Split card
+name: "Fire // Ice"
+type: split
+rarity: uncommon
+faces:
+  - name: "Fire"
+    mana_cost: "{1}{R}"
+    type_line: "Instant"
+    rules_text: "Fire deals 2 damage divided as you choose among one or two targets."
+  - name: "Ice"
+    mana_cost: "{1}{U}"
+    type_line: "Instant"
+    rules_text: "Tap target permanent.\nDraw a card."

@@ -1,0 +1,13 @@
+# Battle card
+name: "Invasion of Gobakhan"
+mana_cost: "{1}{W}"
+type_line: "Battle — Siege"
+type: battle
+rarity: rare
+defense: 3
+rules_text: "When Invasion of Gobakhan enters the battlefield, look at target opponent's hand. You may exile a nonland card from it. For as long as that card remains exiled, its owner may play it. A spell cast this way costs {2} more to cast."
+faces:
+  - # Front face uses top-level fields
+  - name: "Lightshield Array"
+    type_line: "Enchantment"
+    rules_text: "At the beginning of your end step, put a +1/+1 counter on each creature that attacked this turn.\nSacrifice Lightshield Array: Creatures you control gain hexproof and indestructible until end of turn."
