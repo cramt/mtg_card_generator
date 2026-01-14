@@ -12,7 +12,7 @@ fn test_parse_normal_creature() {
     let yaml = read_fixture("normal_creature");
     let card: Card = from_str(&yaml).expect("Failed to parse normal creature");
 
-    assert!(matches!(card.variant, CardVariant::Normal));
+    assert!(matches!(card, Card::Normal { .. }));
     let base = card.base();
     assert_eq!(base.name, "Llanowar Elves");
     let mana = card.get_mana_cost();

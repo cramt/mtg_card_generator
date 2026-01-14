@@ -1,4 +1,4 @@
-use crate::card::{Card, CardVariant, LoyaltyAbility};
+use crate::card::{Card, LoyaltyAbility};
 use crate::mana::{ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyValue, ManaSymbol};
 use anyhow::Result;
 use chromiumoxide::browser::{Browser, BrowserConfig};
@@ -152,10 +152,11 @@ impl Renderer {
 
         let mana_cost = card.get_mana_cost();
 
-        let card_body = match &card.variant {
-            CardVariant::Planeswalker {
+        let card_body = match card {
+            Card::Planeswalker {
                 loyalty,
                 loyalty_abilities,
+                ..
             } => self.render_planeswalker(card, loyalty, loyalty_abilities),
             _ => self.render_normal_card(card, &mana_cost),
         };

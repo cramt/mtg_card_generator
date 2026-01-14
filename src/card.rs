@@ -169,20 +169,39 @@ pub struct CardBase {
 #[repr(C)]
 pub enum Card {
     #[facet(rename = "normal")]
-    Normal,
+    Normal {
+        #[facet(flatten)]
+        base: CardBase,
+    },
     #[facet(rename = "planeswalker")]
     Planeswalker {
+        #[facet(flatten)]
+        base: CardBase,
         loyalty: LoyaltyValue,
         loyalty_abilities: Vec<LoyaltyAbility>,
     },
     #[facet(rename = "saga")]
-    Saga { chapters: Vec<SagaChapter> },
+    Saga {
+        #[facet(flatten)]
+        base: CardBase,
+        chapters: Vec<SagaChapter>,
+    },
     #[facet(rename = "class")]
-    Class { levels: Vec<ClassLevel> },
+    Class {
+        #[facet(flatten)]
+        base: CardBase,
+        levels: Vec<ClassLevel>,
+    },
     #[facet(rename = "adventure")]
-    Adventure { adventure: AdventureCard },
+    Adventure {
+        #[facet(flatten)]
+        base: CardBase,
+        adventure: AdventureCard,
+    },
     #[facet(rename = "split")]
     Split {
+        #[facet(flatten)]
+        base: CardBase,
         faces: Vec<CardFace>,
         #[facet(default)]
         fuse: Option<bool>,
@@ -190,25 +209,68 @@ pub enum Card {
         aftermath: Option<bool>,
     },
     #[facet(rename = "flip")]
-    Flip { faces: Vec<CardFace> },
+    Flip {
+        #[facet(flatten)]
+        base: CardBase,
+        faces: Vec<CardFace>,
+    },
     #[facet(rename = "transform")]
-    Transform { faces: Vec<CardFace> },
+    Transform {
+        #[facet(flatten)]
+        base: CardBase,
+        faces: Vec<CardFace>,
+    },
     #[facet(rename = "modal_dfc")]
-    ModalDfc { faces: Vec<CardFace> },
+    ModalDfc {
+        #[facet(flatten)]
+        base: CardBase,
+        faces: Vec<CardFace>,
+    },
     #[facet(rename = "battle")]
-    Battle { defense: u32, faces: Vec<CardFace> },
+    Battle {
+        #[facet(flatten)]
+        base: CardBase,
+        defense: u32,
+        faces: Vec<CardFace>,
+    },
     #[facet(rename = "meld")]
-    Meld { faces: Vec<CardFace> },
+    Meld {
+        #[facet(flatten)]
+        base: CardBase,
+        faces: Vec<CardFace>,
+    },
     #[facet(rename = "leveler")]
-    Leveler { leveler_ranges: Vec<LevelerRange> },
+    Leveler {
+        #[facet(flatten)]
+        base: CardBase,
+        leveler_ranges: Vec<LevelerRange>,
+    },
     #[facet(rename = "prototype")]
-    Prototype { prototype: CardFace },
+    Prototype {
+        #[facet(flatten)]
+        base: CardBase,
+        prototype: CardFace,
+    },
 }
 
 impl Card {
     /// Get the base card information
     pub fn base(&self) -> &CardBase {
-        &self.base
+        match self {
+            Card::Normal { base } => base,
+            Card::Planeswalker { base, .. } => base,
+            Card::Saga { base, .. } => base,
+            Card::Class { base, .. } => base,
+            Card::Adventure { base, .. } => base,
+            Card::Split { base, .. } => base,
+            Card::Flip { base, .. } => base,
+            Card::Transform { base, .. } => base,
+            Card::ModalDfc { base, .. } => base,
+            Card::Battle { base, .. } => base,
+            Card::Meld { base, .. } => base,
+            Card::Leveler { base, .. } => base,
+            Card::Prototype { base, .. } => base,
+        }
     }
 
     /// Get the mana cost or empty cost
