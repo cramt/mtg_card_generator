@@ -1,4 +1,4 @@
-use crate::card::{Card, LoyaltyAbility};
+use crate::card::{Card, ClassLevel, LoyaltyAbility};
 use crate::mana::{ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyValue, ManaSymbol};
 use anyhow::Result;
 use chromiumoxide::browser::{Browser, BrowserConfig};
@@ -420,6 +420,71 @@ impl Renderer {
                 .rarity-uncommon { background: #707070; }
                 .rarity-rare { background: #a58e4a; }
                 .rarity-mythic { background: #bf4427; }
+
+                /* Class card styles */
+                .class-text-box {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                    background: rgba(255, 255, 255, 0.9);
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                    overflow: hidden;
+                }
+
+                .class-level {
+                    padding: 12px 16px;
+                    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+                }
+
+                .class-level:last-child {
+                    border-bottom: none;
+                }
+
+                .class-level-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+                .class-level-indicator {
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: #333;
+                    background: rgba(0, 0, 0, 0.1);
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                }
+
+                .class-level-cost {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 14px;
+                    color: #333;
+                }
+
+                .class-level-cost .mana-symbol {
+                    width: 18px;
+                    height: 18px;
+                }
+
+                .class-level-text {
+                    font-size: 14px;
+                    line-height: 1.4;
+                    color: #000;
+                }
+
+                .class-level-text .rules-text-inner {
+                    display: inline;
+                }
+
+                .class-level-text .mana-symbol {
+                    width: 14px;
+                    height: 14px;
+                }
                 "#
             }
         }
@@ -502,6 +567,7 @@ impl Renderer {
                 loyalty,
                 loyalty_abilities,
             } => self.render_planeswalker(base, loyalty, loyalty_abilities),
+            Card::Class { base, levels } => self.render_class(base, levels),
             _ => {
                 anyhow::bail!("Card type not yet implemented for rendering");
             }
@@ -552,5 +618,78 @@ impl Renderer {
         _loyalty_abilities: &[LoyaltyAbility],
     ) -> Markup {
         todo!()
+    }
+
+    fn render_class(&self, base: &crate::card::CardBase, levels: &[ClassLevel]) -> Markup {
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div.card class=(frame_class) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (base.name) }
+                                @if let Some(ref cost) = base.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box (placeholder for now)
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text { (base.type_line) }
+                            }
+
+                            // Class levels text box
+                            div.class-text-box {
+                                @for level in levels {
+                                    div.class-level {
+                                        div.class-level-header {
+                                            @if level.level == 1 {
+                                                // Level 1 has no indicator, just the text
+                                                span.class-level-indicator { "(Level 1)" }
+                                            } @else {
+                                                span.class-level-indicator {
+                                                    (format!("Level {}", level.level))
+                                                }
+                                                @if let Some(ref cost) = level.cost {
+                                                    div.class-level-cost {
+                                                        (Self::render_mana_cost(cost))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        div.class-level-text {
+                                            (Self::render_rules_text(&level.text))
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) {}
+                        }
+                    }
+                }
+            }
+        }
     }
 }
