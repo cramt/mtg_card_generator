@@ -257,11 +257,43 @@ impl Renderer {
         }
     }
 
-    /// Generate CSS for card styling
+    /// Generate CSS for card styling with real MTG assets
     fn generate_css() -> Markup {
+        // Get absolute path to mtgrender assets
+        let assets_base = std::env::current_dir()
+            .unwrap_or_default()
+            .join("mtgrender/client/src/assets");
+
         html! {
             style {
                 r#"
+                /* Load real MTG fonts */
+                @font-face {
+                    font-family: 'Beleren';
+                    src: url('file://"# (assets_base.join("fonts/beleren-bold_P1.01.ttf").display()) r#"') format('truetype');
+                    font-weight: bold;
+                }
+                @font-face {
+                    font-family: 'Beleren Small Caps';
+                    src: url('file://"# (assets_base.join("fonts/belerensmallcaps-bold.ttf").display()) r#"') format('truetype');
+                    font-weight: bold;
+                }
+                @font-face {
+                    font-family: 'MPlantin';
+                    src: url('file://"# (assets_base.join("fonts/mplantin.ttf").display()) r#"') format('truetype');
+                    font-weight: normal;
+                }
+                @font-face {
+                    font-family: 'MPlantin';
+                    src: url('file://"# (assets_base.join("fonts/MPlantin-Italic.ttf").display()) r#"') format('truetype');
+                    font-style: italic;
+                }
+                @font-face {
+                    font-family: 'Matrix';
+                    src: url('file://"# (assets_base.join("fonts/MatrixBold.ttf").display()) r#"') format('truetype');
+                    font-weight: bold;
+                }
+
                 * {
                     margin: 0;
                     padding: 0;
@@ -269,7 +301,7 @@ impl Renderer {
                 }
 
                 body {
-                    font-family: 'Beleren', 'Plantin MT Pro', serif;
+                    font-family: 'MPlantin', serif;
                     background: transparent;
                 }
 
@@ -279,27 +311,29 @@ impl Renderer {
                     border-radius: 24px;
                     overflow: hidden;
                     position: relative;
-                    border: 2px solid #000;
+                    background-size: cover;
+                    background-position: center;
                 }
 
                 .card-inner {
                     width: 100%;
                     height: 100%;
-                    padding: 24px;
+                    padding: 0;
                     display: flex;
                     flex-direction: column;
+                    position: relative;
                 }
 
-                /* Frame colors */
-                .frame-white { background: linear-gradient(135deg, #f0f0e0 0%, #e8e8d8 100%); }
-                .frame-blue { background: linear-gradient(135deg, #0e68ab 0%, #0a4d7d 100%); }
-                .frame-black { background: linear-gradient(135deg, #150b00 0%, #2b1810 100%); }
-                .frame-red { background: linear-gradient(135deg, #d3202a 0%, #a01f23 100%); }
-                .frame-green { background: linear-gradient(135deg, #00733e 0%, #005a31 100%); }
-                .frame-gold { background: linear-gradient(135deg, #e0c96b 0%, #c8a858 100%); }
-                .frame-artifact { background: linear-gradient(135deg, #bcc0c3 0%, #9ca3a8 100%); }
-                .frame-colorless { background: linear-gradient(135deg, #ccc2c0 0%, #b8aeac 100%); }
-                .frame-land { background: linear-gradient(135deg, #a6927a 0%, #8b7a65 100%); }
+                /* Frame backgrounds using real assets - use bg/ for ornate textured borders */
+                .frame-white { background-image: url('file://"# (assets_base.join("img/bg/W.png").display()) r#"'); }
+                .frame-blue { background-image: url('file://"# (assets_base.join("img/bg/U.png").display()) r#"'); }
+                .frame-black { background-image: url('file://"# (assets_base.join("img/bg/B.png").display()) r#"'); }
+                .frame-red { background-image: url('file://"# (assets_base.join("img/bg/R.png").display()) r#"'); }
+                .frame-green { background-image: url('file://"# (assets_base.join("img/bg/G.png").display()) r#"'); }
+                .frame-gold { background-image: url('file://"# (assets_base.join("img/bg/Gold.png").display()) r#"'); }
+                .frame-artifact { background-image: url('file://"# (assets_base.join("img/bg/Artifact.png").display()) r#"'); }
+                .frame-colorless { background-image: url('file://"# (assets_base.join("img/bg/Colourless.png").display()) r#"'); }
+                .frame-land { background-image: url('file://"# (assets_base.join("img/bg/Land.png").display()) r#"'); }
 
                 /* Header section */
                 .card-header {
