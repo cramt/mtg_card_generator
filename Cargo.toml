@@ -17,6 +17,7 @@ maud = "0.27"
 
 # Browser automation
 chromiumoxide = { version = "0.8", features = ["tokio-runtime"], default-features = false }
+chromiumoxide_cdp = "0.8"
 
 # Async runtime
 tokio = { version = "1", features = ["full"] }

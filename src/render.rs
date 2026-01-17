@@ -2,8 +2,11 @@ use crate::card::{Card, LoyaltyAbility};
 use crate::mana::{ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyValue, ManaSymbol};
 use anyhow::Result;
 use chromiumoxide::browser::{Browser, BrowserConfig};
+use chromiumoxide::page::ScreenshotParams;
+use chromiumoxide_cdp::cdp::browser_protocol::emulation::SetDeviceMetricsOverrideParams;
+use chromiumoxide_cdp::cdp::browser_protocol::page::CaptureScreenshotFormat;
 use futures::StreamExt;
-use maud::{html, Markup};
+use maud::{Markup, html};
 use std::path::Path;
 
 pub struct Renderer {
@@ -147,107 +150,407 @@ impl Renderer {
         }
     }
 
-    pub async fn render_card(&self, card: &Card, output_path: &Path) -> Result<()> {
-        let page = self.browser.new_page("about:blank").await?;
-
-        let mana_cost = card.get_mana_cost();
-
-        let card_body = match card {
-            Card::Planeswalker {
-                loyalty,
-                loyalty_abilities,
-                ..
-            } => self.render_planeswalker(card, loyalty, loyalty_abilities),
-            _ => self.render_normal_card(card, &mana_cost),
+    /// Derive frame color from mana cost
+    fn derive_frame_color(mana_cost: &Option<CastingManaCost>) -> &'static str {
+        let Some(cost) = mana_cost else {
+            return "land"; // No mana cost = land
         };
 
-        let html_content = html! {
-            (maud::DOCTYPE)
+        let mut has_white = false;
+        let mut has_blue = false;
+        let mut has_black = false;
+        let mut has_red = false;
+        let mut has_green = false;
+        let mut has_colorless = false;
+
+        for symbol in &cost.symbols {
+            match symbol {
+                CastingManaSymbol::White
+                | CastingManaSymbol::WhiteBlue
+                | CastingManaSymbol::WhiteBlack
+                | CastingManaSymbol::WhiteRed
+                | CastingManaSymbol::WhiteGreen
+                | CastingManaSymbol::TwoWhite
+                | CastingManaSymbol::PhyrexianWhite => has_white = true,
+                CastingManaSymbol::Blue
+                | CastingManaSymbol::BlueBlack
+                | CastingManaSymbol::BlueRed
+                | CastingManaSymbol::BlueGreen
+                | CastingManaSymbol::TwoBlue
+                | CastingManaSymbol::PhyrexianBlue => has_blue = true,
+                CastingManaSymbol::Black
+                | CastingManaSymbol::BlackRed
+                | CastingManaSymbol::BlackGreen
+                | CastingManaSymbol::TwoBlack
+                | CastingManaSymbol::PhyrexianBlack => has_black = true,
+                CastingManaSymbol::Red
+                | CastingManaSymbol::RedGreen
+                | CastingManaSymbol::TwoRed
+                | CastingManaSymbol::PhyrexianRed => has_red = true,
+                CastingManaSymbol::Green
+                | CastingManaSymbol::TwoGreen
+                | CastingManaSymbol::PhyrexianGreen => has_green = true,
+                CastingManaSymbol::Colorless => has_colorless = true,
+                _ => {}
+            }
+        }
+
+        let color_count = [has_white, has_blue, has_black, has_red, has_green]
+            .iter()
+            .filter(|&&x| x)
+            .count();
+
+        match color_count {
+            0 => {
+                if has_colorless {
+                    "colorless"
+                } else {
+                    "artifact" // Generic mana only
+                }
+            }
+            1 => {
+                if has_white {
+                    "white"
+                } else if has_blue {
+                    "blue"
+                } else if has_black {
+                    "black"
+                } else if has_red {
+                    "red"
+                } else {
+                    "green"
+                }
+            }
+            _ => "gold", // Multicolor
+        }
+    }
+
+    /// Generate CSS for card styling
+    fn generate_css() -> Markup {
+        html! {
+            style {
+                r#"
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                body {
+                    font-family: 'Beleren', 'Plantin MT Pro', serif;
+                    background: transparent;
+                }
+
+                .card {
+                    width: 744px;
+                    height: 1040px;
+                    border-radius: 24px;
+                    overflow: hidden;
+                    position: relative;
+                    background: #171314;
+                    border: 2px solid #000;
+                }
+
+                .card-inner {
+                    width: 100%;
+                    height: 100%;
+                    padding: 24px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                /* Frame colors */
+                .frame-white { background: linear-gradient(135deg, #f0f0e0 0%, #e8e8d8 100%); }
+                .frame-blue { background: linear-gradient(135deg, #0e68ab 0%, #0a4d7d 100%); }
+                .frame-black { background: linear-gradient(135deg, #150b00 0%, #2b1810 100%); }
+                .frame-red { background: linear-gradient(135deg, #d3202a 0%, #a01f23 100%); }
+                .frame-green { background: linear-gradient(135deg, #00733e 0%, #005a31 100%); }
+                .frame-gold { background: linear-gradient(135deg, #e0c96b 0%, #c8a858 100%); }
+                .frame-artifact { background: linear-gradient(135deg, #bcc0c3 0%, #9ca3a8 100%); }
+                .frame-colorless { background: linear-gradient(135deg, #ccc2c0 0%, #b8aeac 100%); }
+                .frame-land { background: linear-gradient(135deg, #a6927a 0%, #8b7a65 100%); }
+
+                /* Header section */
+                .card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 16px;
+                    background: rgba(0, 0, 0, 0.6);
+                    border-radius: 12px;
+                    margin-bottom: 16px;
+                }
+
+                .card-name {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #fff;
+                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                }
+
+                .mana-cost-container {
+                    display: flex;
+                    gap: 4px;
+                    align-items: center;
+                }
+
+                .mana-symbol {
+                    width: 24px;
+                    height: 24px;
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+
+                .mana-generic {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    background: #ccc;
+                    color: #000;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+
+                /* Art box */
+                .art-box {
+                    width: 100%;
+                    height: 420px;
+                    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+                    border-radius: 12px;
+                    margin-bottom: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #666;
+                    font-size: 18px;
+                    border: 2px solid rgba(0, 0, 0, 0.4);
+                }
+
+                /* Type line */
+                .type-line {
+                    padding: 10px 16px;
+                    background: rgba(0, 0, 0, 0.6);
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                }
+
+                .type-text {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #fff;
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                }
+
+                /* Text box */
+                .text-box {
+                    flex: 1;
+                    padding: 16px;
+                    background: rgba(255, 255, 255, 0.9);
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                    overflow: hidden;
+                }
+
+                .rules-text {
+                    font-size: 16px;
+                    line-height: 1.4;
+                    color: #000;
+                    margin-bottom: 12px;
+                }
+
+                .rules-text-inner {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 2px;
+                }
+
+                .rules-text .mana-symbol {
+                    width: 16px;
+                    height: 16px;
+                }
+
+                .flavor-text {
+                    font-size: 14px;
+                    font-style: italic;
+                    color: #333;
+                    line-height: 1.3;
+                    border-top: 1px solid #ccc;
+                    padding-top: 8px;
+                    margin-top: 8px;
+                }
+
+                /* Power/Toughness box */
+                .pt-box {
+                    position: absolute;
+                    bottom: 32px;
+                    right: 32px;
+                    width: 80px;
+                    height: 60px;
+                    background: rgba(0, 0, 0, 0.7);
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .pt-text {
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #fff;
+                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+                }
+
+                /* Rarity indicator */
+                .rarity-indicator {
+                    position: absolute;
+                    bottom: 32px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                }
+
+                .rarity-common { background: #1a1a1a; }
+                .rarity-uncommon { background: #707070; }
+                .rarity-rare { background: #a58e4a; }
+                .rarity-mythic { background: #bf4427; }
+                "#
+            }
+        }
+    }
+
+    fn render_normal_card(&self, base: &crate::card::CardBase) -> Markup {
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
             html {
                 head {
-                    style {
-                        (include_str!("card.css"))
-                    }
+                    meta charset="utf-8";
+                    (Self::generate_css())
                 }
                 body {
-                    (card_body)
+                    div.card class=(frame_class) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (base.name) }
+                                @if let Some(ref cost) = base.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box (placeholder for now)
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text { (base.type_line) }
+                            }
+
+                            // Text box
+                            div.text-box {
+                                @if let Some(ref rules) = base.rules_text {
+                                    div.rules-text {
+                                        (Self::render_rules_text(rules))
+                                    }
+                                }
+                                @if let Some(ref flavor) = base.flavor_text {
+                                    div.flavor-text {
+                                        (flavor)
+                                    }
+                                }
+                            }
+
+                            // Power/Toughness box (if creature)
+                            @if let (Some(power), Some(toughness)) = (&base.power, &base.toughness) {
+                                div.pt-box {
+                                    div.pt-text { (power) "/" (toughness) }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) {}
+                        }
+                    }
                 }
             }
         }
-        .into_string();
+    }
 
-        page.set_content(html_content).await?;
+    pub async fn render_card(&self, card: &Card, output_path: &Path) -> Result<()> {
+        // Generate HTML based on card type
+        let html = match card {
+            Card::Normal { base } => self.render_normal_card(base),
+            Card::Planeswalker {
+                base,
+                loyalty,
+                loyalty_abilities,
+            } => self.render_planeswalker(base, loyalty, loyalty_abilities),
+            _ => {
+                anyhow::bail!("Card type not yet implemented for rendering");
+            }
+        };
 
-        // Wait for images to load
-        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        // Create a new page
+        let page = self.browser.new_page("about:blank").await?;
 
-        let element = page.find_element(".card").await?;
-        let image_data = element
-            .screenshot(chromiumoxide::cdp::browser_protocol::page::CaptureScreenshotFormat::Png)
-            .await?;
+        // Set device metrics for proper card dimensions (744x1040 at 4x scale = 300 DPI)
+        let metrics = SetDeviceMetricsOverrideParams::builder()
+            .width(744)
+            .height(1040)
+            .device_scale_factor(4.0)
+            .mobile(false)
+            .build()
+            .map_err(|e| anyhow::anyhow!("Failed to build device metrics: {}", e))?;
 
+        page.execute(metrics).await?;
+
+        // Load the HTML content
+        let html_string = html.into_string();
+        page.set_content(&html_string).await?;
+
+        // Wait a bit for content to render
+        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+        // Ensure output directory exists
         if let Some(parent) = output_path.parent() {
-            tokio::fs::create_dir_all(parent).await?;
+            std::fs::create_dir_all(parent)?;
         }
-        tokio::fs::write(output_path, image_data).await?;
 
-        page.close().await?;
+        // Take screenshot with high DPI
+        let screenshot_params = ScreenshotParams::builder()
+            .format(CaptureScreenshotFormat::Png)
+            .full_page(false)
+            .omit_background(false)
+            .build();
+
+        page.save_screenshot(screenshot_params, output_path).await?;
 
         Ok(())
     }
 
-    fn render_normal_card(&self, card: &Card, mana_cost: &CastingManaCost) -> Markup {
-        let base = card.base();
-        html! {
-            div.card.normal {
-                div.header {
-                    div.name { (&base.name) }
-                    div.mana_cost { (Self::render_mana_cost(mana_cost)) }
-                }
-                div.type_line { (&base.type_line) }
-                div.rules_box {
-                    div.rules_text {
-                        (Self::render_rules_text(base.rules_text.as_deref().unwrap_or("")))
-                    }
-                    @if let Some(flavor) = &base.flavor_text {
-                        div.flavor_text { (flavor) }
-                    }
-                }
-                @if let (Some(p), Some(t)) = (&base.power, &base.toughness) {
-                    div.pt {
-                        (p) "/" (t)
-                    }
-                }
-            }
-        }
-    }
-
     fn render_planeswalker(
         &self,
-        card: &Card,
-        loyalty: &LoyaltyValue,
-        loyalty_abilities: &[LoyaltyAbility],
+        _base: &crate::card::CardBase,
+        _loyalty: &LoyaltyValue,
+        _loyalty_abilities: &[LoyaltyAbility],
     ) -> Markup {
-        let mana_cost = card.get_mana_cost();
-        let base = card.base();
-
-        html! {
-            div.card.planeswalker {
-                div.header {
-                    div.name { (&base.name) }
-                    div.mana_cost { (Self::render_mana_cost(&mana_cost)) }
-                }
-                div.type_line { (&base.type_line) }
-                div.loyalty_box {
-                    @for ability in loyalty_abilities {
-                        div.loyalty_ability {
-                            div.loyalty_cost { (ability.cost) }
-                            div.loyalty_text { (Self::render_rules_text(&ability.text)) }
-                        }
-                    }
-                }
-                div.starting_loyalty { (loyalty) }
-            }
-        }
+        todo!()
     }
 }

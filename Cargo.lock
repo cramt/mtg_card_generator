@@ -846,6 +846,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chromiumoxide",
+ "chromiumoxide_cdp",
  "facet",
  "facet-args",
  "facet-yaml",
