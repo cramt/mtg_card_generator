@@ -1,7 +1,7 @@
 ---
 description: Autonomously fixes MTG card rendering to match reference images using visual feedback
 mode: subagent
-model: google/gemini-2.5-flash-preview-05-20
+model: google/antigravity-gemini-3-pro-high
 tools:
   write: false
   edit: true
