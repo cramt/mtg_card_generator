@@ -247,7 +247,6 @@ impl Renderer {
                     border-radius: 24px;
                     overflow: hidden;
                     position: relative;
-                    background: #171314;
                     border: 2px solid #000;
                 }
 
@@ -508,7 +507,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div.card class=(frame_class) {
+                    div class=(format!("card {}", frame_class)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
@@ -638,7 +637,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div.card class=(frame_class) {
+                    div class=(format!("card {}", frame_class)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {

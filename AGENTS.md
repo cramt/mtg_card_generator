@@ -367,3 +367,17 @@ Recommended implementation order:
 - Browser automation is async - all rendering functions should be async and use tokio
 - Test fixtures are the source of truth for YAML schema - keep them in sync with SPEC.md
 - **NEVER run git commands with GPG signing enabled** - always disable it first with `git config --local commit.gpgsign false`
+
+## OpenCode-Specific Features
+
+### Restarting OpenCode
+If you need OpenCode to reload configuration (e.g., after editing `opencode.json`, `.opencode/agent/*.md`, or `flake.nix`), ask the user to restart OpenCode. Changes to these files are not picked up automatically.
+
+### Card Evaluation Agent
+A custom `card-eval` subagent is configured in `.opencode/agent/card-eval.md` that uses Gemini vision to evaluate rendered card images. Invoke it via the Task tool:
+```
+Task(subagent_type="card-eval", prompt="Evaluate ./output/card.png")
+```
+
+### Available Custom Agents
+- `card-eval`: Evaluates rendered MTG card images for visual correctness using vision capabilities
