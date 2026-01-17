@@ -14,6 +14,7 @@
 /// assert_eq!(sanitize_card_name("Emeria's Call"), "emerias_call");
 /// assert_eq!(sanitize_card_name("Delver of Secrets // Insectile Aberration"), "delver_of_secrets_insectile_aberration");
 /// ```
+#[must_use]
 pub fn sanitize_card_name(name: &str) -> String {
     name.to_lowercase()
         .chars()

@@ -25,7 +25,7 @@
 //! - ❌ Planeswalker rendering (marked todo!())
 //! - ❌ Saga, Adventure, Transform, and other special layouts
 
-use crate::card::{Card, ClassLevel, LoyaltyAbility};
+use crate::card::{Card, CardBase, ClassLevel, LoyaltyAbility, Rarity};
 use crate::mana::{ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyValue, ManaSymbol};
 use anyhow::Result;
 use chromiumoxide::browser::{Browser, BrowserConfig};
@@ -35,6 +35,36 @@ use chromiumoxide_cdp::cdp::browser_protocol::page::CaptureScreenshotFormat;
 use futures::StreamExt;
 use maud::{Markup, html};
 use std::path::Path;
+
+/// CSS class names for frame colors
+struct FrameClasses {
+    bg: String,
+    frame: String,
+    text_box_bg: String,
+    pt_box: String,
+}
+
+impl FrameClasses {
+    fn from_mana_cost(mana_cost: &Option<CastingManaCost>) -> Self {
+        let frame_color = Renderer::derive_frame_color(mana_cost);
+        Self {
+            bg: format!("bg-{}", frame_color),
+            frame: format!("frame-{}", frame_color),
+            text_box_bg: format!("text-box-bg-{}", frame_color),
+            pt_box: format!("pt-box-{}", frame_color),
+        }
+    }
+}
+
+/// Convert rarity to CSS class name
+fn rarity_class(rarity: Rarity) -> &'static str {
+    match rarity {
+        Rarity::Common => "rarity-common",
+        Rarity::Uncommon => "rarity-uncommon",
+        Rarity::Rare => "rarity-rare",
+        Rarity::Mythic => "rarity-mythic",
+    }
+}
 
 pub struct Renderer {
     browser: Browser,
@@ -325,26 +355,37 @@ impl Renderer {
                 }
 
                 /* Frame backgrounds using real assets - use bg/ for ornate textured borders */
-                .frame-white { background-image: url('file://"# (assets_base.join("img/bg/W.png").display()) r#"'); }
-                .frame-blue { background-image: url('file://"# (assets_base.join("img/bg/U.png").display()) r#"'); }
-                .frame-black { background-image: url('file://"# (assets_base.join("img/bg/B.png").display()) r#"'); }
-                .frame-red { background-image: url('file://"# (assets_base.join("img/bg/R.png").display()) r#"'); }
-                .frame-green { background-image: url('file://"# (assets_base.join("img/bg/G.png").display()) r#"'); }
-                .frame-gold { background-image: url('file://"# (assets_base.join("img/bg/Gold.png").display()) r#"'); }
-                .frame-artifact { background-image: url('file://"# (assets_base.join("img/bg/Artifact.png").display()) r#"'); }
-                .frame-colorless { background-image: url('file://"# (assets_base.join("img/bg/Colourless.png").display()) r#"'); }
-                .frame-land { background-image: url('file://"# (assets_base.join("img/bg/Land.png").display()) r#"'); }
+                .bg-white { background-image: url('file://"# (assets_base.join("img/bg/W.png").display()) r#"'); }
+                .bg-blue { background-image: url('file://"# (assets_base.join("img/bg/U.png").display()) r#"'); }
+                .bg-black { background-image: url('file://"# (assets_base.join("img/bg/B.png").display()) r#"'); }
+                .bg-red { background-image: url('file://"# (assets_base.join("img/bg/R.png").display()) r#"'); }
+                .bg-green { background-image: url('file://"# (assets_base.join("img/bg/G.png").display()) r#"'); }
+                .bg-gold { background-image: url('file://"# (assets_base.join("img/bg/Gold.png").display()) r#"'); }
+                .bg-artifact { background-image: url('file://"# (assets_base.join("img/bg/Artifact.png").display()) r#"'); }
+                .bg-colorless { background-image: url('file://"# (assets_base.join("img/bg/Colourless.png").display()) r#"'); }
+                .bg-land { background-image: url('file://"# (assets_base.join("img/bg/Land.png").display()) r#"'); }
 
-                /* Text box backgrounds */
-                .text-box-white { background-image: url('file://"# (assets_base.join("img/boxes/W.png").display()) r#"'); }
-                .text-box-blue { background-image: url('file://"# (assets_base.join("img/boxes/U.png").display()) r#"'); }
-                .text-box-black { background-image: url('file://"# (assets_base.join("img/boxes/B.png").display()) r#"'); }
-                .text-box-red { background-image: url('file://"# (assets_base.join("img/boxes/R.png").display()) r#"'); }
-                .text-box-green { background-image: url('file://"# (assets_base.join("img/boxes/G.png").display()) r#"'); }
-                .text-box-gold { background-image: url('file://"# (assets_base.join("img/boxes/Gold.png").display()) r#"'); }
-                .text-box-artifact { background-image: url('file://"# (assets_base.join("img/boxes/Artifact.png").display()) r#"'); }
-                .text-box-colorless { background-image: url('file://"# (assets_base.join("img/boxes/Colourless.png").display()) r#"'); }
-                .text-box-land { background-image: url('file://"# (assets_base.join("img/boxes/Land.png").display()) r#"'); }
+                /* Main Frame overlays (Borders, Name/Type boxes) */
+                .frame-white { background-image: url('file://"# (assets_base.join("img/frames/W.png").display()) r#"'); }
+                .frame-blue { background-image: url('file://"# (assets_base.join("img/frames/U.png").display()) r#"'); }
+                .frame-black { background-image: url('file://"# (assets_base.join("img/frames/B.png").display()) r#"'); }
+                .frame-red { background-image: url('file://"# (assets_base.join("img/frames/R.png").display()) r#"'); }
+                .frame-green { background-image: url('file://"# (assets_base.join("img/frames/G.png").display()) r#"'); }
+                .frame-gold { background-image: url('file://"# (assets_base.join("img/frames/Gold.png").display()) r#"'); }
+                .frame-artifact { background-image: url('file://"# (assets_base.join("img/frames/Artifact.png").display()) r#"'); }
+                .frame-colorless { background-image: url('file://"# (assets_base.join("img/frames/Colourless.png").display()) r#"'); }
+                .frame-land { background-image: url('file://"# (assets_base.join("img/frames/Land.png").display()) r#"'); }
+
+                /* Text box backgrounds (parchment) */
+                .text-box-bg-white { background-image: url('file://"# (assets_base.join("img/boxes/W.png").display()) r#"'); }
+                .text-box-bg-blue { background-image: url('file://"# (assets_base.join("img/boxes/U.png").display()) r#"'); }
+                .text-box-bg-black { background-image: url('file://"# (assets_base.join("img/boxes/B.png").display()) r#"'); }
+                .text-box-bg-red { background-image: url('file://"# (assets_base.join("img/boxes/R.png").display()) r#"'); }
+                .text-box-bg-green { background-image: url('file://"# (assets_base.join("img/boxes/G.png").display()) r#"'); }
+                .text-box-bg-gold { background-image: url('file://"# (assets_base.join("img/boxes/Gold.png").display()) r#"'); }
+                .text-box-bg-artifact { background-image: url('file://"# (assets_base.join("img/boxes/Artifact.png").display()) r#"'); }
+                .text-box-bg-colorless { background-image: url('file://"# (assets_base.join("img/boxes/Colourless.png").display()) r#"'); }
+                .text-box-bg-land { background-image: url('file://"# (assets_base.join("img/boxes/Land.png").display()) r#"'); }
 
                 /* P/T box backgrounds */
                 .pt-box-white { background-image: url('file://"# (assets_base.join("img/pt_boxes/W.png").display()) r#"'); }
@@ -362,18 +403,18 @@ impl Renderer {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 4px 12px;
+                    padding: 4px 6px;
                     margin-bottom: 0;
                     position: absolute;
-                    top: 36px;
-                    left: 36px;
-                    width: 672px; /* 744 - 36*2 */
+                    top: 28px;
+                    left: 42px;
+                    width: 660px;
                     height: 38px;
-                    z-index: 10;
+                    z-index: 20;
                 }
 
                 .card-name {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: bold;
                     color: #000;
                     font-family: 'Beleren', serif;
@@ -411,51 +452,60 @@ impl Renderer {
                 /* Art box */
                 .art-box {
                     position: absolute;
-                    top: 74px;
+                    top: 75px;
                     left: 36px;
                     width: 672px;
-                    height: 356px;
+                    height: 460px;
                     background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: #666;
                     font-size: 18px;
-                    border: 1px solid #000;
-                    z-index: 5;
+                    z-index: 1;
                 }
 
                 /* Type line */
                 .type-line {
                     position: absolute;
-                    top: 436px;
-                    left: 36px;
-                    width: 672px;
+                    top: 546px;
+                    left: 42px;
+                    width: 660px;
                     height: 38px;
                     display: flex;
                     align-items: center;
-                    padding-left: 12px;
-                    z-index: 10;
+                    padding-left: 6px;
+                    z-index: 20;
                 }
 
                 .type-text {
-                    font-size: 28px;
+                    font-size: 26px;
                     font-weight: bold;
                     color: #000;
                     font-family: 'Beleren Small Caps', serif;
                     letter-spacing: 0.5px;
                 }
 
-                /* Text box */
+                /* Text box background (parchment) */
+                .text-box-bg {
+                    position: absolute;
+                    top: 590px;
+                    left: 44px;
+                    width: 656px;
+                    height: 335px;
+                    background-size: 100% 100%;
+                    z-index: 1;
+                }
+
+                /* Text box content */
                 .text-box {
                     position: absolute;
-                    top: 480px;
-                    left: 36px;
-                    width: 672px;
-                    height: 420px;
-                    padding: 24px 32px;
-                    background-size: 100% 100%;
-                    z-index: 5;
+                    top: 590px;
+                    left: 44px;
+                    width: 656px;
+                    height: 335px;
+                    padding: 24px 28px;
+                    z-index: 20;
                     font-family: 'MPlantin', serif;
                     display: flex;
                     flex-direction: column;
@@ -463,9 +513,20 @@ impl Renderer {
                     gap: 12px;
                 }
 
+                .card-frame {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-size: cover;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+
                 .rules-text {
-                    font-size: 26px;
-                    line-height: 1.3;
+                    font-size: 25px;
+                    line-height: 1.35;
                     color: #000;
                     margin-bottom: 12px;
                 }
@@ -481,10 +542,10 @@ impl Renderer {
                 }
 
                 .flavor-text {
-                    font-size: 24px;
+                    font-size: 23px;
                     font-style: italic;
                     color: #000;
-                    line-height: 1.2;
+                    line-height: 1.25;
                     padding-top: 8px;
                     margin-top: 8px;
                 }
@@ -492,8 +553,8 @@ impl Renderer {
                 /* Power/Toughness box */
                 .pt-box {
                     position: absolute;
-                    bottom: 26px;
-                    right: 26px;
+                    bottom: 22px;
+                    right: 20px;
                     width: 90px;
                     height: 64px;
                     background-size: contain;
@@ -501,11 +562,11 @@ impl Renderer {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 20;
+                    z-index: 25;
                 }
 
                 .pt-text {
-                    font-size: 36px;
+                    font-size: 34px;
                     font-weight: bold;
                     color: #000;
                     font-family: 'Matrix', serif;
@@ -910,18 +971,9 @@ impl Renderer {
         }
     }
 
-    fn render_normal_card(&self, base: &crate::card::CardBase) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-        let text_box_class = format!("text-box-{}", frame_color);
-        let pt_box_class = format!("pt-box-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+    fn render_normal_card(&self, base: &CardBase) -> Markup {
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -930,7 +982,20 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.bg)) {
+                        // Layers:
+                        // 1. Text box background (parchment)
+                        div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
+
+                        // 2. Art placeholder (should be under frame?)
+                        div.art-box {
+                            "[Art]"
+                        }
+
+                        // 3. Main Frame Overlay (borders, title bar, type bar)
+                        div class=(format!("card-frame {}", classes.frame)) {}
+
+                        // 4. Content (Text) - z-index 20
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
@@ -940,18 +1005,13 @@ impl Renderer {
                                 }
                             }
 
-                            // Art box (placeholder for now)
-                            div.art-box {
-                                "[Art]"
-                            }
-
                             // Type line
                             div.type-line {
                                 div.type-text { (base.type_line) }
                             }
 
-                            // Text box
-                            div class=(format!("text-box {}", text_box_class)) {
+                            // Text box content
+                            div.text-box {
                                 @if let Some(ref rules) = base.rules_text {
                                     div.rules-text {
                                         (Self::render_rules_text(rules))
@@ -966,13 +1026,13 @@ impl Renderer {
 
                             // Power/Toughness box (if creature)
                             @if let (Some(power), Some(toughness)) = (&base.power, &base.toughness) {
-                                div class=(format!("pt-box {}", pt_box_class)) {
+                                div class=(format!("pt-box {}", classes.pt_box)) {
                                     div.pt-text { (power) "/" (toughness) }
                                 }
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) {}
+                            div.rarity-indicator class=(rarity) {}
                         }
                     }
                 }
@@ -1068,19 +1128,12 @@ impl Renderer {
 
     fn render_planeswalker(
         &self,
-        base: &crate::card::CardBase,
+        base: &CardBase,
         loyalty: &LoyaltyValue,
         loyalty_abilities: &[LoyaltyAbility],
     ) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         // Format loyalty value
         let loyalty_text = match loyalty {
@@ -1095,7 +1148,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.frame)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
@@ -1142,7 +1195,7 @@ impl Renderer {
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) {}
+                            div.rarity-indicator class=(rarity) {}
                         }
                     }
                 }
@@ -1150,16 +1203,9 @@ impl Renderer {
         }
     }
 
-    fn render_class(&self, base: &crate::card::CardBase, levels: &[ClassLevel]) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+    fn render_class(&self, base: &CardBase, levels: &[ClassLevel]) -> Markup {
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -1168,7 +1214,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.frame)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
@@ -1215,7 +1261,7 @@ impl Renderer {
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) {}
+                            div.rarity-indicator class=(rarity) {}
                         }
                     }
                 }
@@ -1223,20 +1269,9 @@ impl Renderer {
         }
     }
 
-    fn render_saga(
-        &self,
-        base: &crate::card::CardBase,
-        chapters: &[crate::card::SagaChapter],
-    ) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+    fn render_saga(&self, base: &CardBase, chapters: &[crate::card::SagaChapter]) -> Markup {
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -1245,7 +1280,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.frame)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
@@ -1287,7 +1322,7 @@ impl Renderer {
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) {}
+                            div.rarity-indicator class=(rarity) {}
                         }
                     }
                 }
@@ -1295,22 +1330,9 @@ impl Renderer {
         }
     }
 
-    fn render_adventure(
-        &self,
-        base: &crate::card::CardBase,
-        adventure: &crate::card::AdventureCard,
-    ) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-        let text_box_class = format!("text-box-{}", frame_color);
-        let pt_box_class = format!("pt-box-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+    fn render_adventure(&self, base: &CardBase, adventure: &crate::card::AdventureCard) -> Markup {
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -1319,7 +1341,7 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.frame)) {
                         div.adventure-card {
                             // Left side - Adventure spell
                             div.adventure-left {
@@ -1327,13 +1349,13 @@ impl Renderer {
                                     (Self::render_mana_cost(&adventure.mana_cost))
                                 }
                                 div.adventure-name {
-                                    (adventure.name)
+                                    (&adventure.name)
                                 }
                                 div.adventure-type {
-                                    (adventure.type_line)
+                                    (&adventure.type_line)
                                 }
                                 div.adventure-text {
-                                    (adventure.rules_text)
+                                    (&adventure.rules_text)
                                 }
                             }
 
@@ -1341,7 +1363,7 @@ impl Renderer {
                             div.adventure-right {
                                 // Header with name and mana cost
                                 div.card-header {
-                                    div.card-name { (base.name) }
+                                    div.card-name { (&base.name) }
                                     @if let Some(ref cost) = base.mana_cost {
                                         (Self::render_mana_cost(cost))
                                     }
@@ -1354,11 +1376,11 @@ impl Renderer {
 
                                 // Type line
                                 div.type-line {
-                                    div.type-text { (base.type_line) }
+                                    div.type-text { (&base.type_line) }
                                 }
 
                                 // Text box
-                                div class=(format!("text-box {}", text_box_class)) {
+                                div class=(format!("text-box {}", classes.text_box_bg)) {
                                     @if let Some(ref rules) = base.rules_text {
                                         div.rules-text {
                                             (Self::render_rules_text(rules))
@@ -1373,13 +1395,13 @@ impl Renderer {
 
                                 // Power/Toughness box
                                 @if let (Some(power), Some(toughness)) = (&base.power, &base.toughness) {
-                                    div class=(format!("pt-box {}", pt_box_class)) {
+                                    div class=(format!("pt-box {}", classes.pt_box)) {
                                         div.pt-text { (power) "/" (toughness) }
                                     }
                                 }
 
                                 // Rarity indicator
-                                div.rarity-indicator class=(rarity_class) {}
+                                div.rarity-indicator class=(rarity) {}
                             }
                         }
                     }
@@ -1390,17 +1412,12 @@ impl Renderer {
 
     fn render_split(
         &self,
-        base: &crate::card::CardBase,
+        base: &CardBase,
         faces: &[crate::card::CardFace],
         _fuse: &Option<bool>,
         _aftermath: &Option<bool>,
     ) -> Markup {
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
-        };
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -1412,11 +1429,9 @@ impl Renderer {
                     div.card {
                         div.split-card {
                             @for face in faces {
-                                @let frame_color = Self::derive_frame_color(&face.mana_cost);
-                                @let frame_class = format!("frame-{}", frame_color);
-                                @let text_box_class = format!("text-box-{}", frame_color);
+                                @let face_classes = FrameClasses::from_mana_cost(&face.mana_cost);
 
-                                div class=(format!("split-half {}", frame_class)) {
+                                div class=(format!("split-half {}", face_classes.frame)) {
                                     div.split-header {
                                         div.split-name {
                                             @if let Some(ref name) = face.name {
@@ -1440,7 +1455,7 @@ impl Renderer {
                                         }
                                     }
 
-                                    div class=(format!("split-text-box {}", text_box_class)) {
+                                    div class=(format!("split-text-box {}", face_classes.text_box_bg)) {
                                         @if let Some(ref rules) = face.rules_text {
                                             div.split-rules {
                                                 (Self::render_rules_text(rules))
@@ -1451,7 +1466,7 @@ impl Renderer {
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);" {}
+                            div.rarity-indicator class=(rarity) style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);" {}
                         }
                     }
                 }
@@ -1462,189 +1477,18 @@ impl Renderer {
     /// Render a double-faced card (Transform or Modal DFC) - renders front face only
     fn render_dfc_face(
         &self,
-        base: &crate::card::CardBase,
+        base: &CardBase,
         faces: &[crate::card::CardFace],
         _card_type: &str,
     ) -> Markup {
         // For now, render the front face as a normal card
         // TODO: Generate both faces as separate images
-        if let Some(front_face) = faces.first() {
-            let frame_color = Self::derive_frame_color(&front_face.mana_cost);
-            let frame_class = format!("frame-{}", frame_color);
-            let text_box_class = format!("text-box-{}", frame_color);
-            let pt_box_class = format!("pt-box-{}", frame_color);
-
-            let rarity_class = match base.rarity {
-                crate::card::Rarity::Common => "rarity-common",
-                crate::card::Rarity::Uncommon => "rarity-uncommon",
-                crate::card::Rarity::Rare => "rarity-rare",
-                crate::card::Rarity::Mythic => "rarity-mythic",
-            };
-
-            html! {
-                html {
-                    head {
-                        meta charset="utf-8";
-                        (Self::generate_css())
-                    }
-                    body {
-                        div class=(format!("card {}", frame_class)) {
-                            div.card-inner {
-                                // Header with name and mana cost
-                                div.card-header {
-                                    div.card-name {
-                                        @if let Some(ref name) = front_face.name {
-                                            (name)
-                                        }
-                                    }
-                                    @if let Some(ref cost) = front_face.mana_cost {
-                                        (Self::render_mana_cost(cost))
-                                    }
-                                }
-
-                                // Art box
-                                div.art-box {
-                                    "[Art]"
-                                }
-
-                                // Type line
-                                div.type-line {
-                                    div.type-text {
-                                        @if let Some(ref type_line) = front_face.type_line {
-                                            (type_line)
-                                        }
-                                    }
-                                }
-
-                                // Text box
-                                div class=(format!("text-box {}", text_box_class)) {
-                                    @if let Some(ref rules) = front_face.rules_text {
-                                        div.rules-text {
-                                            (Self::render_rules_text(rules))
-                                        }
-                                    }
-                                    @if let Some(ref flavor) = front_face.flavor_text {
-                                        div.flavor-text {
-                                            (flavor)
-                                        }
-                                    }
-                                }
-
-                                // Power/Toughness box
-                                @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
-                                    div class=(format!("pt-box {}", pt_box_class)) {
-                                        div.pt-text { (power) "/" (toughness) }
-                                    }
-                                }
-
-                                // Rarity indicator
-                                div.rarity-indicator class=(rarity_class) {}
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            html! { html { body { "Error: No faces found" } } }
-        }
-    }
-
-    fn render_flip(&self, base: &crate::card::CardBase, faces: &[crate::card::CardFace]) -> Markup {
-        // Flip cards show the top half normally and the bottom half upside down
-        // For now, just render the front face
-        // TODO: Implement proper flip card layout
-        if let Some(front_face) = faces.first() {
-            let frame_color = Self::derive_frame_color(&front_face.mana_cost);
-            let frame_class = format!("frame-{}", frame_color);
-            let text_box_class = format!("text-box-{}", frame_color);
-            let pt_box_class = format!("pt-box-{}", frame_color);
-
-            let rarity_class = match base.rarity {
-                crate::card::Rarity::Common => "rarity-common",
-                crate::card::Rarity::Uncommon => "rarity-uncommon",
-                crate::card::Rarity::Rare => "rarity-rare",
-                crate::card::Rarity::Mythic => "rarity-mythic",
-            };
-
-            html! {
-                html {
-                    head {
-                        meta charset="utf-8";
-                        (Self::generate_css())
-                    }
-                    body {
-                        div class=(format!("card {}", frame_class)) {
-                            div.card-inner {
-                                // Header with name and mana cost
-                                div.card-header {
-                                    div.card-name {
-                                        @if let Some(ref name) = front_face.name {
-                                            (name)
-                                        }
-                                    }
-                                    @if let Some(ref cost) = front_face.mana_cost {
-                                        (Self::render_mana_cost(cost))
-                                    }
-                                }
-
-                                // Art box
-                                div.art-box {
-                                    "[Art]"
-                                }
-
-                                // Type line
-                                div.type-line {
-                                    div.type-text {
-                                        @if let Some(ref type_line) = front_face.type_line {
-                                            (type_line)
-                                        }
-                                    }
-                                }
-
-                                // Text box
-                                div class=(format!("text-box {}", text_box_class)) {
-                                    @if let Some(ref rules) = front_face.rules_text {
-                                        div.rules-text {
-                                            (Self::render_rules_text(rules))
-                                        }
-                                    }
-                                    @if let Some(ref flavor) = front_face.flavor_text {
-                                        div.flavor-text {
-                                            (flavor)
-                                        }
-                                    }
-                                }
-
-                                // Power/Toughness box
-                                @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
-                                    div class=(format!("pt-box {}", pt_box_class)) {
-                                        div.pt-text { (power) "/" (toughness) }
-                                    }
-                                }
-
-                                // Rarity indicator
-                                div.rarity-indicator class=(rarity_class) {}
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            html! { html { body { "Error: No faces found" } } }
-        }
-    }
-
-    fn render_battle(&self, base: &crate::card::CardBase, defense: u32) -> Markup {
-        let frame_color = Self::derive_frame_color(&base.mana_cost);
-        let frame_class = format!("frame-{}", frame_color);
-        let text_box_class = format!("text-box-{}", frame_color);
-
-        let rarity_class = match base.rarity {
-            crate::card::Rarity::Common => "rarity-common",
-            crate::card::Rarity::Uncommon => "rarity-uncommon",
-            crate::card::Rarity::Rare => "rarity-rare",
-            crate::card::Rarity::Mythic => "rarity-mythic",
+        let Some(front_face) = faces.first() else {
+            return html! { html { body { "Error: No faces found" } } };
         };
+
+        let classes = FrameClasses::from_mana_cost(&front_face.mana_cost);
+        let rarity = rarity_class(base.rarity);
 
         html! {
             html {
@@ -1653,11 +1497,156 @@ impl Renderer {
                     (Self::generate_css())
                 }
                 body {
-                    div class=(format!("card {}", frame_class)) {
+                    div class=(format!("card {}", classes.frame)) {
                         div.card-inner {
                             // Header with name and mana cost
                             div.card-header {
-                                div.card-name { (base.name) }
+                                div.card-name {
+                                    @if let Some(ref name) = front_face.name {
+                                        (name)
+                                    }
+                                }
+                                @if let Some(ref cost) = front_face.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text {
+                                    @if let Some(ref type_line) = front_face.type_line {
+                                        (type_line)
+                                    }
+                                }
+                            }
+
+                            // Text box
+                            div class=(format!("text-box {}", classes.text_box_bg)) {
+                                @if let Some(ref rules) = front_face.rules_text {
+                                    div.rules-text {
+                                        (Self::render_rules_text(rules))
+                                    }
+                                }
+                                @if let Some(ref flavor) = front_face.flavor_text {
+                                    div.flavor-text {
+                                        (flavor)
+                                    }
+                                }
+                            }
+
+                            // Power/Toughness box
+                            @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
+                                div class=(format!("pt-box {}", classes.pt_box)) {
+                                    div.pt-text { (power) "/" (toughness) }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn render_flip(&self, base: &CardBase, faces: &[crate::card::CardFace]) -> Markup {
+        // Flip cards show the top half normally and the bottom half upside down
+        // For now, just render the front face
+        // TODO: Implement proper flip card layout
+        let Some(front_face) = faces.first() else {
+            return html! { html { body { "Error: No faces found" } } };
+        };
+
+        let classes = FrameClasses::from_mana_cost(&front_face.mana_cost);
+        let rarity = rarity_class(base.rarity);
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", classes.frame)) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name {
+                                    @if let Some(ref name) = front_face.name {
+                                        (name)
+                                    }
+                                }
+                                @if let Some(ref cost) = front_face.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text {
+                                    @if let Some(ref type_line) = front_face.type_line {
+                                        (type_line)
+                                    }
+                                }
+                            }
+
+                            // Text box
+                            div class=(format!("text-box {}", classes.text_box_bg)) {
+                                @if let Some(ref rules) = front_face.rules_text {
+                                    div.rules-text {
+                                        (Self::render_rules_text(rules))
+                                    }
+                                }
+                                @if let Some(ref flavor) = front_face.flavor_text {
+                                    div.flavor-text {
+                                        (flavor)
+                                    }
+                                }
+                            }
+
+                            // Power/Toughness box
+                            @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
+                                div class=(format!("pt-box {}", classes.pt_box)) {
+                                    div.pt_text { (power) "/" (toughness) }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn render_battle(&self, base: &CardBase, defense: u32) -> Markup {
+        let classes = FrameClasses::from_mana_cost(&base.mana_cost);
+        let rarity = rarity_class(base.rarity);
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", classes.frame)) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (&base.name) }
                                 @if let Some(ref cost) = base.mana_cost {
                                     (Self::render_mana_cost(cost))
                                 }
@@ -1670,11 +1659,11 @@ impl Renderer {
 
                             // Type line
                             div.type-line {
-                                div.type-text { (base.type_line) }
+                                div.type-text { (&base.type_line) }
                             }
 
                             // Text box
-                            div class=(format!("text-box {}", text_box_class)) {
+                            div class=(format!("text-box {}", classes.text_box_bg)) {
                                 @if let Some(ref rules) = base.rules_text {
                                     div.rules-text {
                                         (Self::render_rules_text(rules))
@@ -1693,7 +1682,7 @@ impl Renderer {
                             }
 
                             // Rarity indicator
-                            div.rarity-indicator class=(rarity_class) {}
+                            div.rarity-indicator class=(rarity) {}
                         }
                     }
                 }
@@ -1703,7 +1692,7 @@ impl Renderer {
 
     fn render_leveler(
         &self,
-        base: &crate::card::CardBase,
+        base: &CardBase,
         _leveler_ranges: &[crate::card::LevelerRange],
     ) -> Markup {
         // Leveler cards have a complex layout with level bars
@@ -1712,11 +1701,7 @@ impl Renderer {
         self.render_normal_card(base)
     }
 
-    fn render_prototype(
-        &self,
-        base: &crate::card::CardBase,
-        _prototype: &crate::card::CardFace,
-    ) -> Markup {
+    fn render_prototype(&self, base: &CardBase, _prototype: &crate::card::CardFace) -> Markup {
         // Prototype cards show two sets of stats
         // For now, render as a normal card showing the main stats
         // TODO: Implement proper prototype layout with both stat sets

@@ -133,6 +133,9 @@ pub struct CardBase {
 }
 
 /// Variant-specific data for different card types
+///
+/// Each variant contains a `CardBase` with common fields like name, mana cost, type line, etc.
+/// Use the `base()` method to access the common fields without pattern matching.
 #[derive(Facet, Debug, Clone)]
 #[facet(tag = "type")]
 #[repr(C)]
@@ -222,4 +225,41 @@ pub enum Card {
         base: CardBase,
         prototype: CardFace,
     },
+}
+
+impl Card {
+    /// Returns a reference to the common card base fields.
+    ///
+    /// This provides access to name, mana_cost, type_line, rules_text, flavor_text,
+    /// power, toughness, and rarity without needing to pattern match on the variant.
+    #[must_use]
+    pub fn base(&self) -> &CardBase {
+        match self {
+            Card::Normal { base }
+            | Card::Planeswalker { base, .. }
+            | Card::Saga { base, .. }
+            | Card::Class { base, .. }
+            | Card::Adventure { base, .. }
+            | Card::Split { base, .. }
+            | Card::Flip { base, .. }
+            | Card::Transform { base, .. }
+            | Card::ModalDfc { base, .. }
+            | Card::Battle { base, .. }
+            | Card::Meld { base, .. }
+            | Card::Leveler { base, .. }
+            | Card::Prototype { base, .. } => base,
+        }
+    }
+
+    /// Returns the card's name.
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.base().name
+    }
+
+    /// Returns the card's rarity.
+    #[must_use]
+    pub fn rarity(&self) -> Rarity {
+        self.base().rarity
+    }
 }

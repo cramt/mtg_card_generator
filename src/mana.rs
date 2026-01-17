@@ -121,7 +121,7 @@ impl fmt::Display for ManaSymbol {
 }
 
 /// A mana cost specifically for casting a spell (corner symbols)
-#[derive(Facet, Debug, Clone, PartialEq, Eq)]
+#[derive(Facet, Debug, Clone, PartialEq, Eq, Default)]
 #[facet(proxy = CastingManaCostProxy)]
 pub struct CastingManaCost {
     pub symbols: Vec<CastingManaSymbol>,
@@ -167,7 +167,7 @@ impl TryFrom<&Option<CastingManaCost>> for CastingManaCostProxy {
 }
 
 /// A general cost that can include actions like tap/untap (rules text)
-#[derive(Facet, Debug, Clone, PartialEq, Eq)]
+#[derive(Facet, Debug, Clone, PartialEq, Eq, Default)]
 #[facet(proxy = ActionCostProxy)]
 pub struct ActionCost {
     pub symbols: Vec<ManaSymbol>,
@@ -203,27 +203,24 @@ pub enum LoyaltyCost {
     MinusX,
 }
 
-#[derive(Facet)]
-#[facet(transparent)]
-pub struct LoyaltyCostProxy(pub String);
-
-impl TryFrom<LoyaltyCostProxy> for LoyaltyCost {
-    type Error = String;
-    fn try_from(proxy: LoyaltyCostProxy) -> Result<Self, Self::Error> {
-        let v = proxy.0.trim().to_uppercase();
+impl LoyaltyCost {
+    /// Parse a loyalty cost from a string like "+2", "-3", "0", "+X", "-X"
+    #[must_use = "parsing returns a Result that should be handled"]
+    pub fn parse(s: &str) -> Result<Self, String> {
+        let v = s.trim().to_uppercase();
         if v == "0" {
             Ok(LoyaltyCost::Zero)
         } else if v == "+X" {
             Ok(LoyaltyCost::PlusX)
         } else if v == "-X" {
             Ok(LoyaltyCost::MinusX)
-        } else if v.starts_with('+') {
-            let n = v[1..]
+        } else if let Some(rest) = v.strip_prefix('+') {
+            let n = rest
                 .parse::<u8>()
                 .map_err(|_| format!("Invalid plus loyalty cost: {}", v))?;
             Ok(LoyaltyCost::Plus(n))
-        } else if v.starts_with('-') {
-            let n = v[1..]
+        } else if let Some(rest) = v.strip_prefix('-') {
+            let n = rest
                 .parse::<u8>()
                 .map_err(|_| format!("Invalid minus loyalty cost: {}", v))?;
             Ok(LoyaltyCost::Minus(n))
@@ -236,6 +233,17 @@ impl TryFrom<LoyaltyCostProxy> for LoyaltyCost {
         } else {
             Err(format!("Unknown loyalty cost: {}", v))
         }
+    }
+}
+
+#[derive(Facet)]
+#[facet(transparent)]
+pub struct LoyaltyCostProxy(pub String);
+
+impl TryFrom<LoyaltyCostProxy> for LoyaltyCost {
+    type Error = String;
+    fn try_from(proxy: LoyaltyCostProxy) -> Result<Self, Self::Error> {
+        LoyaltyCost::parse(&proxy.0)
     }
 }
 
@@ -267,14 +275,11 @@ pub enum LoyaltyValue {
     X,
 }
 
-#[derive(Facet)]
-#[facet(transparent)]
-pub struct LoyaltyValueProxy(pub String);
-
-impl TryFrom<LoyaltyValueProxy> for LoyaltyValue {
-    type Error = String;
-    fn try_from(proxy: LoyaltyValueProxy) -> Result<Self, Self::Error> {
-        let v = proxy.0.trim().to_uppercase();
+impl LoyaltyValue {
+    /// Parse a loyalty value from a string like "3" or "X"
+    #[must_use = "parsing returns a Result that should be handled"]
+    pub fn parse(s: &str) -> Result<Self, String> {
+        let v = s.trim().to_uppercase();
         if v == "X" {
             Ok(LoyaltyValue::X)
         } else {
@@ -283,6 +288,17 @@ impl TryFrom<LoyaltyValueProxy> for LoyaltyValue {
                 .map_err(|_| format!("Invalid loyalty value: {}", v))?;
             Ok(LoyaltyValue::Numeric(n))
         }
+    }
+}
+
+#[derive(Facet)]
+#[facet(transparent)]
+pub struct LoyaltyValueProxy(pub String);
+
+impl TryFrom<LoyaltyValueProxy> for LoyaltyValue {
+    type Error = String;
+    fn try_from(proxy: LoyaltyValueProxy) -> Result<Self, Self::Error> {
+        LoyaltyValue::parse(&proxy.0)
     }
 }
 
@@ -331,47 +347,14 @@ impl TryFrom<String> for ActionCost {
 impl TryFrom<String> for LoyaltyCost {
     type Error = String;
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        let v = value.trim().to_uppercase();
-        if v == "0" {
-            Ok(LoyaltyCost::Zero)
-        } else if v == "+X" {
-            Ok(LoyaltyCost::PlusX)
-        } else if v == "-X" {
-            Ok(LoyaltyCost::MinusX)
-        } else if v.starts_with('+') {
-            let n = v[1..]
-                .parse::<u8>()
-                .map_err(|_| format!("Invalid plus loyalty cost: {}", v))?;
-            Ok(LoyaltyCost::Plus(n))
-        } else if v.starts_with('-') {
-            let n = v[1..]
-                .parse::<u8>()
-                .map_err(|_| format!("Invalid minus loyalty cost: {}", v))?;
-            Ok(LoyaltyCost::Minus(n))
-        } else if let Ok(n) = v.parse::<u8>() {
-            if n == 0 {
-                Ok(LoyaltyCost::Zero)
-            } else {
-                Ok(LoyaltyCost::Plus(n))
-            }
-        } else {
-            Err(format!("Unknown loyalty cost: {}", v))
-        }
+        LoyaltyCost::parse(&value)
     }
 }
 
 impl TryFrom<String> for LoyaltyValue {
     type Error = String;
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        let v = value.trim().to_uppercase();
-        if v == "X" {
-            Ok(LoyaltyValue::X)
-        } else {
-            let n = v
-                .parse::<u32>()
-                .map_err(|_| format!("Invalid loyalty value: {}", v))?;
-            Ok(LoyaltyValue::Numeric(n))
-        }
+        LoyaltyValue::parse(&value)
     }
 }
 
@@ -385,6 +368,8 @@ impl fmt::Display for LoyaltyValue {
 }
 
 impl CastingManaCost {
+    /// Parse a mana cost string like "{2}{U}{U}" into a CastingManaCost
+    #[must_use = "parsing returns a Result that should be handled"]
     pub fn parse(input: &str) -> Result<Self, ManaCostParseError> {
         let mut symbols = Vec::new();
         let bytes = input.as_bytes();
@@ -416,6 +401,8 @@ impl CastingManaCost {
         Ok(CastingManaCost { symbols })
     }
 
+    /// Parse a single mana symbol from its string representation (without braces)
+    #[must_use = "parsing returns a Result that should be handled"]
     pub fn parse_symbol(content: &str) -> Result<CastingManaSymbol, ManaCostParseError> {
         match content {
             "W" => Ok(CastingManaSymbol::White),
@@ -465,6 +452,7 @@ impl CastingManaCost {
     }
 
     /// Get the total generic mana cost (including all numeric symbols)
+    #[must_use]
     pub fn generic_cost(&self) -> u32 {
         self.symbols
             .iter()
@@ -476,6 +464,7 @@ impl CastingManaCost {
     }
 
     /// Check if this mana cost contains a variable component (X, Y, or Z)
+    #[must_use]
     pub fn has_variable(&self) -> bool {
         self.symbols.iter().any(|s| {
             matches!(
@@ -486,6 +475,7 @@ impl CastingManaCost {
     }
 
     /// Count how many colored mana symbols are in this cost
+    #[must_use]
     pub fn colored_count(&self) -> u32 {
         self.symbols
             .iter()
@@ -504,6 +494,8 @@ impl CastingManaCost {
 }
 
 impl ActionCost {
+    /// Parse an action cost string like "{T}{1}{U}" into an ActionCost
+    #[must_use = "parsing returns a Result that should be handled"]
     pub fn parse(input: &str) -> Result<Self, ManaCostParseError> {
         let mut symbols = Vec::new();
         let bytes = input.as_bytes();
@@ -609,15 +601,16 @@ impl fmt::Display for ManaCostParseError {
 
 impl std::error::Error for ManaCostParseError {}
 
-/// Implement From<&str> for convenience
-impl From<&str> for CastingManaCost {
-    fn from(s: &str) -> Self {
-        CastingManaCost::parse(s).unwrap_or_else(|_| CastingManaCost { symbols: vec![] })
+impl TryFrom<&str> for CastingManaCost {
+    type Error = ManaCostParseError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        CastingManaCost::parse(s)
     }
 }
 
-impl From<&str> for ActionCost {
-    fn from(s: &str) -> Self {
-        ActionCost::parse(s).unwrap_or_else(|_| ActionCost { symbols: vec![] })
+impl TryFrom<&str> for ActionCost {
+    type Error = ManaCostParseError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        ActionCost::parse(s)
     }
 }
