@@ -308,7 +308,7 @@ impl Renderer {
                 .card {
                     width: 744px;
                     height: 1040px;
-                    border-radius: 24px;
+                    border-radius: 37px;
                     overflow: hidden;
                     position: relative;
                     background-size: cover;
@@ -362,36 +362,37 @@ impl Renderer {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 12px 16px;
-                    /* background: rgba(0, 0, 0, 0.6); */
-                    /* border-radius: 12px; */
-                    margin-bottom: 16px;
+                    padding: 4px 12px;
+                    margin-bottom: 0;
                     position: absolute;
-                    top: 28px;
-                    left: 28px;
-                    width: 688px; /* 744 - 28*2 */
-                    height: 40px;
+                    top: 36px;
+                    left: 36px;
+                    width: 672px; /* 744 - 36*2 */
+                    height: 38px;
                     z-index: 10;
                 }
 
                 .card-name {
-                    font-size: 26px;
+                    font-size: 32px;
                     font-weight: bold;
                     color: #000;
                     font-family: 'Beleren', serif;
+                    letter-spacing: 0.5px;
                 }
 
                 .mana-cost-container {
                     display: flex;
-                    gap: 4px;
+                    gap: 5px;
                     align-items: center;
                 }
 
                 .mana-symbol {
-                    width: 24px;
-                    height: 24px;
+                    width: 26px;
+                    height: 26px;
                     display: inline-block;
                     vertical-align: middle;
+                    box-shadow: -2px 2px 0px rgba(0,0,0,0.4);
+                    border-radius: 13px;
                 }
 
                 .mana-generic {
@@ -410,10 +411,10 @@ impl Renderer {
                 /* Art box */
                 .art-box {
                     position: absolute;
-                    top: 80px;
+                    top: 74px;
                     left: 36px;
                     width: 672px;
-                    height: 490px;
+                    height: 356px;
                     background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
                     display: flex;
                     align-items: center;
@@ -427,30 +428,31 @@ impl Renderer {
                 /* Type line */
                 .type-line {
                     position: absolute;
-                    top: 600px;
-                    left: 28px;
-                    width: 688px;
+                    top: 436px;
+                    left: 36px;
+                    width: 672px;
                     height: 38px;
                     display: flex;
                     align-items: center;
-                    padding-left: 8px;
+                    padding-left: 12px;
                     z-index: 10;
                 }
 
                 .type-text {
-                    font-size: 24px;
+                    font-size: 28px;
                     font-weight: bold;
                     color: #000;
-                    font-family: 'Beleren', serif;
+                    font-family: 'Beleren Small Caps', serif;
+                    letter-spacing: 0.5px;
                 }
 
                 /* Text box */
                 .text-box {
                     position: absolute;
-                    top: 640px; /* Shifted up slightly to reduce gap */
+                    top: 480px;
                     left: 36px;
                     width: 672px;
-                    height: 330px; /* Increased height slightly */
+                    height: 420px;
                     padding: 24px 32px;
                     background-size: 100% 100%;
                     z-index: 5;
@@ -462,20 +464,27 @@ impl Renderer {
                 }
 
                 .rules-text {
-                    font-size: 24px; /* Increased from 16px */
+                    font-size: 26px;
                     line-height: 1.3;
                     color: #000;
                     margin-bottom: 12px;
                 }
                 
-                /* ... skipping inner classes ... */
+                .rules-text-inner {
+                    display: inline;
+                }
+
+                .rules-text .mana-symbol {
+                    width: 22px;
+                    height: 22px;
+                    vertical-align: text-bottom;
+                }
 
                 .flavor-text {
-                    font-size: 22px; /* Increased from 14px */
+                    font-size: 24px;
                     font-style: italic;
                     color: #000;
                     line-height: 1.2;
-                    /* border-top removed, separator usually handled by spacing or line */
                     padding-top: 8px;
                     margin-top: 8px;
                 }
@@ -502,57 +511,6 @@ impl Renderer {
                     font-family: 'Matrix', serif;
                     padding-top: 6px;
                     padding-left: 6px;
-                }
-
-                .rules-text {
-                    font-size: 16px;
-                    line-height: 1.4;
-                    color: #000;
-                    margin-bottom: 12px;
-                }
-
-                .rules-text-inner {
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: center;
-                    gap: 2px;
-                }
-
-                .rules-text .mana-symbol {
-                    width: 16px;
-                    height: 16px;
-                }
-
-                .flavor-text {
-                    font-size: 14px;
-                    font-style: italic;
-                    color: #333;
-                    line-height: 1.3;
-                    border-top: 1px solid #ccc;
-                    padding-top: 8px;
-                    margin-top: 8px;
-                }
-
-                /* Power/Toughness box */
-                .pt-box {
-                    position: absolute;
-                    bottom: 32px;
-                    right: 32px;
-                    width: 80px;
-                    height: 60px;
-                    background: rgba(0, 0, 0, 0.7);
-                    border: 3px solid rgba(255, 255, 255, 0.3);
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .pt-text {
-                    font-size: 32px;
-                    font-weight: bold;
-                    color: #fff;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
                 }
 
                 /* Rarity indicator */
@@ -634,6 +592,318 @@ impl Renderer {
                 .class-level-text .mana-symbol {
                     width: 14px;
                     height: 14px;
+                }
+
+                /* Planeswalker styles */
+                .planeswalker-text-box {
+                    position: absolute;
+                    top: 480px;
+                    left: 36px;
+                    width: 672px;
+                    height: 420px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    padding: 16px 24px;
+                    z-index: 5;
+                }
+
+                .loyalty-ability {
+                    display: flex;
+                    gap: 12px;
+                    padding: 8px 12px;
+                    background: rgba(255, 255, 255, 0.85);
+                    border-radius: 6px;
+                    border: 1px solid rgba(0, 0, 0, 0.2);
+                    align-items: flex-start;
+                }
+
+                .loyalty-cost {
+                    flex-shrink: 0;
+                    width: 48px;
+                    height: 48px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 28px;
+                    font-weight: bold;
+                    font-family: 'Beleren', serif;
+                    border-radius: 50%;
+                    color: #fff;
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                }
+
+                .loyalty-cost-plus {
+                    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                }
+
+                .loyalty-cost-minus {
+                    background: linear-gradient(135deg, #e24a4a 0%, #bd3535 100%);
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                }
+
+                .loyalty-cost-zero {
+                    background: linear-gradient(135deg, #888 0%, #666 100%);
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                }
+
+                .loyalty-ability-text {
+                    flex: 1;
+                    font-size: 22px;
+                    line-height: 1.3;
+                    color: #000;
+                    font-family: 'MPlantin', serif;
+                    padding-top: 4px;
+                }
+
+                .loyalty-ability-text .mana-symbol {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                .loyalty-counter {
+                    position: absolute;
+                    bottom: 32px;
+                    right: 36px;
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #f4f4f4 0%, #d4d4d4 100%);
+                    border: 4px solid #000;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 48px;
+                    font-weight: bold;
+                    font-family: 'Beleren', serif;
+                    color: #000;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+                    z-index: 20;
+                }
+
+                /* Saga styles */
+                .saga-text-box {
+                    position: absolute;
+                    top: 480px;
+                    left: 36px;
+                    width: 672px;
+                    height: 420px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    padding: 20px 28px;
+                    z-index: 5;
+                }
+
+                .saga-chapter {
+                    display: flex;
+                    gap: 16px;
+                    padding: 10px 14px;
+                    background: rgba(255, 255, 255, 0.85);
+                    border-radius: 6px;
+                    border-left: 4px solid rgba(0, 0, 0, 0.3);
+                    align-items: flex-start;
+                }
+
+                .saga-chapter-number {
+                    flex-shrink: 0;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    font-family: 'Beleren', serif;
+                    color: #fff;
+                    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+                    border-radius: 50%;
+                    border: 2px solid #000;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                }
+
+                .saga-chapter-text {
+                    flex: 1;
+                    font-size: 22px;
+                    line-height: 1.3;
+                    color: #000;
+                    font-family: 'MPlantin', serif;
+                    padding-top: 6px;
+                }
+
+                .saga-chapter-text .mana-symbol {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                /* Adventure card styles */
+                .adventure-card {
+                    display: flex;
+                    flex-direction: row;
+                }
+
+                .adventure-left {
+                    width: 200px;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    padding: 20px 16px;
+                    border-right: 2px solid rgba(0, 0, 0, 0.3);
+                    background: rgba(0, 0, 0, 0.05);
+                }
+
+                .adventure-name {
+                    font-size: 20px;
+                    font-weight: bold;
+                    font-family: 'Beleren', serif;
+                    color: #000;
+                    margin-bottom: 8px;
+                    writing-mode: vertical-rl;
+                    text-orientation: mixed;
+                    transform: rotate(180deg);
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .adventure-cost {
+                    writing-mode: vertical-rl;
+                    transform: rotate(180deg);
+                    display: flex;
+                    gap: 4px;
+                    margin-bottom: 12px;
+                }
+
+                .adventure-type {
+                    font-size: 14px;
+                    font-family: 'Beleren Small Caps', serif;
+                    color: #000;
+                    writing-mode: vertical-rl;
+                    text-orientation: mixed;
+                    transform: rotate(180deg);
+                    margin-bottom: 12px;
+                }
+
+                .adventure-text {
+                    font-size: 14px;
+                    line-height: 1.2;
+                    font-family: 'MPlantin', serif;
+                    color: #000;
+                    writing-mode: vertical-rl;
+                    text-orientation: mixed;
+                    transform: rotate(180deg);
+                    flex: 2;
+                }
+
+                .adventure-right {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                }
+
+                /* Split card styles */
+                .split-card {
+                    display: flex;
+                    flex-direction: row;
+                    transform: rotate(-90deg);
+                    transform-origin: center center;
+                    width: 1040px;
+                    height: 744px;
+                    position: absolute;
+                    top: 148px;
+                    left: -148px;
+                }
+
+                .split-half {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    border-right: 2px solid rgba(0, 0, 0, 0.5);
+                }
+
+                .split-half:last-child {
+                    border-right: none;
+                }
+
+                .split-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 4px 12px;
+                    margin: 36px 36px 0 36px;
+                    height: 38px;
+                }
+
+                .split-name {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #000;
+                    font-family: 'Beleren', serif;
+                }
+
+                .split-art {
+                    margin: 8px 36px;
+                    height: 280px;
+                    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #666;
+                    font-size: 16px;
+                    border: 1px solid #000;
+                }
+
+                .split-type {
+                    margin: 0 36px;
+                    padding: 4px 12px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .split-type-text {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #000;
+                    font-family: 'Beleren Small Caps', serif;
+                }
+
+                .split-text-box {
+                    margin: 8px 36px 36px 36px;
+                    flex: 1;
+                    padding: 16px 20px;
+                    background-size: 100% 100%;
+                }
+
+                .split-rules {
+                    font-size: 22px;
+                    line-height: 1.3;
+                    color: #000;
+                }
+
+                /* Battle card styles */
+                .defense-counter {
+                    position: absolute;
+                    bottom: 32px;
+                    right: 36px;
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #e8e8e8 0%, #c8c8c8 100%);
+                    border: 4px solid #000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 48px;
+                    font-weight: bold;
+                    font-family: 'Beleren', serif;
+                    color: #000;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+                    z-index: 20;
+                    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
                 }
                 "#
             }
@@ -720,9 +990,30 @@ impl Renderer {
                 loyalty_abilities,
             } => self.render_planeswalker(base, loyalty, loyalty_abilities),
             Card::Class { base, levels } => self.render_class(base, levels),
-            _ => {
-                anyhow::bail!("Card type not yet implemented for rendering");
-            }
+            Card::Saga { base, chapters } => self.render_saga(base, chapters),
+            Card::Adventure { base, adventure } => self.render_adventure(base, adventure),
+            Card::Split {
+                base,
+                faces,
+                fuse,
+                aftermath,
+            } => self.render_split(base, faces, fuse, aftermath),
+            Card::Transform { base, faces } => self.render_dfc_face(base, faces, "Transform"),
+            Card::ModalDfc { base, faces } => self.render_dfc_face(base, faces, "Modal DFC"),
+            Card::Flip { base, faces } => self.render_flip(base, faces),
+            Card::Battle {
+                base,
+                defense,
+                backside_name: _,
+                backside_type_line: _,
+                backside_rules_text: _,
+            } => self.render_battle(base, *defense),
+            Card::Leveler {
+                base,
+                leveler_ranges,
+            } => self.render_leveler(base, leveler_ranges),
+            Card::Prototype { base, prototype } => self.render_prototype(base, prototype),
+            Card::Meld { base, faces } => self.render_dfc_face(base, faces, "Meld"),
         };
 
         // Create a new page
@@ -777,11 +1068,86 @@ impl Renderer {
 
     fn render_planeswalker(
         &self,
-        _base: &crate::card::CardBase,
-        _loyalty: &LoyaltyValue,
-        _loyalty_abilities: &[LoyaltyAbility],
+        base: &crate::card::CardBase,
+        loyalty: &LoyaltyValue,
+        loyalty_abilities: &[LoyaltyAbility],
     ) -> Markup {
-        todo!()
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        // Format loyalty value
+        let loyalty_text = match loyalty {
+            LoyaltyValue::Numeric(n) => n.to_string(),
+            LoyaltyValue::X => "X".to_string(),
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", frame_class)) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (base.name) }
+                                @if let Some(ref cost) = base.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box (placeholder for now)
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text { (base.type_line) }
+                            }
+
+                            // Planeswalker abilities
+                            div.planeswalker-text-box {
+                                @for ability in loyalty_abilities {
+                                    div.loyalty-ability {
+                                        @let (cost_class, cost_text) = match &ability.cost {
+                                            crate::mana::LoyaltyCost::Plus(n) => ("loyalty-cost-plus", format!("+{}", n)),
+                                            crate::mana::LoyaltyCost::Minus(n) => ("loyalty-cost-minus", format!("-{}", n)),
+                                            crate::mana::LoyaltyCost::Zero => ("loyalty-cost-zero", "0".to_string()),
+                                            crate::mana::LoyaltyCost::PlusX => ("loyalty-cost-plus", "+X".to_string()),
+                                            crate::mana::LoyaltyCost::MinusX => ("loyalty-cost-minus", "-X".to_string()),
+                                        };
+                                        div class=(format!("loyalty-cost {}", cost_class)) {
+                                            (cost_text)
+                                        }
+                                        div.loyalty-ability-text {
+                                            (Self::render_rules_text(&ability.text))
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Loyalty counter
+                            div.loyalty-counter {
+                                (loyalty_text)
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) {}
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn render_class(&self, base: &crate::card::CardBase, levels: &[ClassLevel]) -> Markup {
@@ -855,5 +1221,505 @@ impl Renderer {
                 }
             }
         }
+    }
+
+    fn render_saga(
+        &self,
+        base: &crate::card::CardBase,
+        chapters: &[crate::card::SagaChapter],
+    ) -> Markup {
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", frame_class)) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (base.name) }
+                                @if let Some(ref cost) = base.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box (placeholder for now)
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text { (base.type_line) }
+                            }
+
+                            // Saga chapters
+                            div.saga-text-box {
+                                @for chapter in chapters {
+                                    div.saga-chapter {
+                                        div.saga-chapter-number {
+                                            @if chapter.chapters.len() == 1 {
+                                                (format!("{}", chapter.chapters[0]))
+                                            } @else {
+                                                // For combined chapters like "I-II", show range
+                                                (format!("{}-{}",
+                                                    chapter.chapters.first().unwrap_or(&1),
+                                                    chapter.chapters.last().unwrap_or(&1)))
+                                            }
+                                        }
+                                        div.saga-chapter-text {
+                                            (Self::render_rules_text(&chapter.text))
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn render_adventure(
+        &self,
+        base: &crate::card::CardBase,
+        adventure: &crate::card::AdventureCard,
+    ) -> Markup {
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+        let text_box_class = format!("text-box-{}", frame_color);
+        let pt_box_class = format!("pt-box-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", frame_class)) {
+                        div.adventure-card {
+                            // Left side - Adventure spell
+                            div.adventure-left {
+                                div.adventure-cost {
+                                    (Self::render_mana_cost(&adventure.mana_cost))
+                                }
+                                div.adventure-name {
+                                    (adventure.name)
+                                }
+                                div.adventure-type {
+                                    (adventure.type_line)
+                                }
+                                div.adventure-text {
+                                    (adventure.rules_text)
+                                }
+                            }
+
+                            // Right side - Main creature card
+                            div.adventure-right {
+                                // Header with name and mana cost
+                                div.card-header {
+                                    div.card-name { (base.name) }
+                                    @if let Some(ref cost) = base.mana_cost {
+                                        (Self::render_mana_cost(cost))
+                                    }
+                                }
+
+                                // Art box
+                                div.art-box {
+                                    "[Art]"
+                                }
+
+                                // Type line
+                                div.type-line {
+                                    div.type-text { (base.type_line) }
+                                }
+
+                                // Text box
+                                div class=(format!("text-box {}", text_box_class)) {
+                                    @if let Some(ref rules) = base.rules_text {
+                                        div.rules-text {
+                                            (Self::render_rules_text(rules))
+                                        }
+                                    }
+                                    @if let Some(ref flavor) = base.flavor_text {
+                                        div.flavor-text {
+                                            (flavor)
+                                        }
+                                    }
+                                }
+
+                                // Power/Toughness box
+                                @if let (Some(power), Some(toughness)) = (&base.power, &base.toughness) {
+                                    div class=(format!("pt-box {}", pt_box_class)) {
+                                        div.pt-text { (power) "/" (toughness) }
+                                    }
+                                }
+
+                                // Rarity indicator
+                                div.rarity-indicator class=(rarity_class) {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn render_split(
+        &self,
+        base: &crate::card::CardBase,
+        faces: &[crate::card::CardFace],
+        _fuse: &Option<bool>,
+        _aftermath: &Option<bool>,
+    ) -> Markup {
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div.card {
+                        div.split-card {
+                            @for face in faces {
+                                @let frame_color = Self::derive_frame_color(&face.mana_cost);
+                                @let frame_class = format!("frame-{}", frame_color);
+                                @let text_box_class = format!("text-box-{}", frame_color);
+
+                                div class=(format!("split-half {}", frame_class)) {
+                                    div.split-header {
+                                        div.split-name {
+                                            @if let Some(ref name) = face.name {
+                                                (name)
+                                            }
+                                        }
+                                        @if let Some(ref cost) = face.mana_cost {
+                                            (Self::render_mana_cost(cost))
+                                        }
+                                    }
+
+                                    div.split-art {
+                                        "[Art]"
+                                    }
+
+                                    div.split-type {
+                                        div.split-type-text {
+                                            @if let Some(ref type_line) = face.type_line {
+                                                (type_line)
+                                            }
+                                        }
+                                    }
+
+                                    div class=(format!("split-text-box {}", text_box_class)) {
+                                        @if let Some(ref rules) = face.rules_text {
+                                            div.split-rules {
+                                                (Self::render_rules_text(rules))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);" {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Render a double-faced card (Transform or Modal DFC) - renders front face only
+    fn render_dfc_face(
+        &self,
+        base: &crate::card::CardBase,
+        faces: &[crate::card::CardFace],
+        _card_type: &str,
+    ) -> Markup {
+        // For now, render the front face as a normal card
+        // TODO: Generate both faces as separate images
+        if let Some(front_face) = faces.first() {
+            let frame_color = Self::derive_frame_color(&front_face.mana_cost);
+            let frame_class = format!("frame-{}", frame_color);
+            let text_box_class = format!("text-box-{}", frame_color);
+            let pt_box_class = format!("pt-box-{}", frame_color);
+
+            let rarity_class = match base.rarity {
+                crate::card::Rarity::Common => "rarity-common",
+                crate::card::Rarity::Uncommon => "rarity-uncommon",
+                crate::card::Rarity::Rare => "rarity-rare",
+                crate::card::Rarity::Mythic => "rarity-mythic",
+            };
+
+            html! {
+                html {
+                    head {
+                        meta charset="utf-8";
+                        (Self::generate_css())
+                    }
+                    body {
+                        div class=(format!("card {}", frame_class)) {
+                            div.card-inner {
+                                // Header with name and mana cost
+                                div.card-header {
+                                    div.card-name {
+                                        @if let Some(ref name) = front_face.name {
+                                            (name)
+                                        }
+                                    }
+                                    @if let Some(ref cost) = front_face.mana_cost {
+                                        (Self::render_mana_cost(cost))
+                                    }
+                                }
+
+                                // Art box
+                                div.art-box {
+                                    "[Art]"
+                                }
+
+                                // Type line
+                                div.type-line {
+                                    div.type-text {
+                                        @if let Some(ref type_line) = front_face.type_line {
+                                            (type_line)
+                                        }
+                                    }
+                                }
+
+                                // Text box
+                                div class=(format!("text-box {}", text_box_class)) {
+                                    @if let Some(ref rules) = front_face.rules_text {
+                                        div.rules-text {
+                                            (Self::render_rules_text(rules))
+                                        }
+                                    }
+                                    @if let Some(ref flavor) = front_face.flavor_text {
+                                        div.flavor-text {
+                                            (flavor)
+                                        }
+                                    }
+                                }
+
+                                // Power/Toughness box
+                                @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
+                                    div class=(format!("pt-box {}", pt_box_class)) {
+                                        div.pt-text { (power) "/" (toughness) }
+                                    }
+                                }
+
+                                // Rarity indicator
+                                div.rarity-indicator class=(rarity_class) {}
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            html! { html { body { "Error: No faces found" } } }
+        }
+    }
+
+    fn render_flip(&self, base: &crate::card::CardBase, faces: &[crate::card::CardFace]) -> Markup {
+        // Flip cards show the top half normally and the bottom half upside down
+        // For now, just render the front face
+        // TODO: Implement proper flip card layout
+        if let Some(front_face) = faces.first() {
+            let frame_color = Self::derive_frame_color(&front_face.mana_cost);
+            let frame_class = format!("frame-{}", frame_color);
+            let text_box_class = format!("text-box-{}", frame_color);
+            let pt_box_class = format!("pt-box-{}", frame_color);
+
+            let rarity_class = match base.rarity {
+                crate::card::Rarity::Common => "rarity-common",
+                crate::card::Rarity::Uncommon => "rarity-uncommon",
+                crate::card::Rarity::Rare => "rarity-rare",
+                crate::card::Rarity::Mythic => "rarity-mythic",
+            };
+
+            html! {
+                html {
+                    head {
+                        meta charset="utf-8";
+                        (Self::generate_css())
+                    }
+                    body {
+                        div class=(format!("card {}", frame_class)) {
+                            div.card-inner {
+                                // Header with name and mana cost
+                                div.card-header {
+                                    div.card-name {
+                                        @if let Some(ref name) = front_face.name {
+                                            (name)
+                                        }
+                                    }
+                                    @if let Some(ref cost) = front_face.mana_cost {
+                                        (Self::render_mana_cost(cost))
+                                    }
+                                }
+
+                                // Art box
+                                div.art-box {
+                                    "[Art]"
+                                }
+
+                                // Type line
+                                div.type-line {
+                                    div.type-text {
+                                        @if let Some(ref type_line) = front_face.type_line {
+                                            (type_line)
+                                        }
+                                    }
+                                }
+
+                                // Text box
+                                div class=(format!("text-box {}", text_box_class)) {
+                                    @if let Some(ref rules) = front_face.rules_text {
+                                        div.rules-text {
+                                            (Self::render_rules_text(rules))
+                                        }
+                                    }
+                                    @if let Some(ref flavor) = front_face.flavor_text {
+                                        div.flavor-text {
+                                            (flavor)
+                                        }
+                                    }
+                                }
+
+                                // Power/Toughness box
+                                @if let (Some(power), Some(toughness)) = (&front_face.power, &front_face.toughness) {
+                                    div class=(format!("pt-box {}", pt_box_class)) {
+                                        div.pt-text { (power) "/" (toughness) }
+                                    }
+                                }
+
+                                // Rarity indicator
+                                div.rarity-indicator class=(rarity_class) {}
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            html! { html { body { "Error: No faces found" } } }
+        }
+    }
+
+    fn render_battle(&self, base: &crate::card::CardBase, defense: u32) -> Markup {
+        let frame_color = Self::derive_frame_color(&base.mana_cost);
+        let frame_class = format!("frame-{}", frame_color);
+        let text_box_class = format!("text-box-{}", frame_color);
+
+        let rarity_class = match base.rarity {
+            crate::card::Rarity::Common => "rarity-common",
+            crate::card::Rarity::Uncommon => "rarity-uncommon",
+            crate::card::Rarity::Rare => "rarity-rare",
+            crate::card::Rarity::Mythic => "rarity-mythic",
+        };
+
+        html! {
+            html {
+                head {
+                    meta charset="utf-8";
+                    (Self::generate_css())
+                }
+                body {
+                    div class=(format!("card {}", frame_class)) {
+                        div.card-inner {
+                            // Header with name and mana cost
+                            div.card-header {
+                                div.card-name { (base.name) }
+                                @if let Some(ref cost) = base.mana_cost {
+                                    (Self::render_mana_cost(cost))
+                                }
+                            }
+
+                            // Art box
+                            div.art-box {
+                                "[Art]"
+                            }
+
+                            // Type line
+                            div.type-line {
+                                div.type-text { (base.type_line) }
+                            }
+
+                            // Text box
+                            div class=(format!("text-box {}", text_box_class)) {
+                                @if let Some(ref rules) = base.rules_text {
+                                    div.rules-text {
+                                        (Self::render_rules_text(rules))
+                                    }
+                                }
+                                @if let Some(ref flavor) = base.flavor_text {
+                                    div.flavor-text {
+                                        (flavor)
+                                    }
+                                }
+                            }
+
+                            // Defense counter (hexagonal shape)
+                            div.defense-counter {
+                                (defense)
+                            }
+
+                            // Rarity indicator
+                            div.rarity-indicator class=(rarity_class) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn render_leveler(
+        &self,
+        base: &crate::card::CardBase,
+        _leveler_ranges: &[crate::card::LevelerRange],
+    ) -> Markup {
+        // Leveler cards have a complex layout with level bars
+        // For now, render as a normal card
+        // TODO: Implement proper leveler layout
+        self.render_normal_card(base)
+    }
+
+    fn render_prototype(
+        &self,
+        base: &crate::card::CardBase,
+        _prototype: &crate::card::CardFace,
+    ) -> Markup {
+        // Prototype cards show two sets of stats
+        // For now, render as a normal card showing the main stats
+        // TODO: Implement proper prototype layout with both stat sets
+        self.render_normal_card(base)
     }
 }
