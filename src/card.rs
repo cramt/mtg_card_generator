@@ -16,37 +16,6 @@ pub enum Rarity {
     Mythic,
 }
 
-#[derive(Facet, Debug, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum CardType {
-    #[facet(rename = "normal")]
-    Normal,
-    #[facet(rename = "planeswalker")]
-    Planeswalker,
-    #[facet(rename = "saga")]
-    Saga,
-    #[facet(rename = "class")]
-    Class,
-    #[facet(rename = "adventure")]
-    Adventure,
-    #[facet(rename = "split")]
-    Split,
-    #[facet(rename = "flip")]
-    Flip,
-    #[facet(rename = "transform")]
-    Transform,
-    #[facet(rename = "modal_dfc")]
-    ModalDfc,
-    #[facet(rename = "battle")]
-    Battle,
-    #[facet(rename = "meld")]
-    Meld,
-    #[facet(rename = "leveler")]
-    Leveler,
-    #[facet(rename = "prototype")]
-    Prototype,
-}
-
 /// A single chapter in a saga
 #[derive(Facet, Debug, Clone, PartialEq, Eq)]
 pub struct SagaChapter {
@@ -231,7 +200,9 @@ pub enum Card {
         #[facet(flatten)]
         base: CardBase,
         defense: u32,
-        faces: Vec<CardFace>,
+        backside_name: String,
+        backside_type_line: String,
+        backside_rules_text: String,
     },
     #[facet(rename = "meld")]
     Meld {
@@ -251,33 +222,4 @@ pub enum Card {
         base: CardBase,
         prototype: CardFace,
     },
-}
-
-impl Card {
-    /// Get the base card information
-    pub fn base(&self) -> &CardBase {
-        match self {
-            Card::Normal { base } => base,
-            Card::Planeswalker { base, .. } => base,
-            Card::Saga { base, .. } => base,
-            Card::Class { base, .. } => base,
-            Card::Adventure { base, .. } => base,
-            Card::Split { base, .. } => base,
-            Card::Flip { base, .. } => base,
-            Card::Transform { base, .. } => base,
-            Card::ModalDfc { base, .. } => base,
-            Card::Battle { base, .. } => base,
-            Card::Meld { base, .. } => base,
-            Card::Leveler { base, .. } => base,
-            Card::Prototype { base, .. } => base,
-        }
-    }
-
-    /// Get the mana cost or empty cost
-    pub fn get_mana_cost(&self) -> CastingManaCost {
-        self.base()
-            .mana_cost
-            .clone()
-            .unwrap_or_else(|| CastingManaCost { symbols: vec![] })
-    }
 }

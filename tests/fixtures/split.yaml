@@ -1,6 +1,7 @@
 # Split card
 name: "Fire // Ice"
 type: split
+type_line: "Instant // Instant"
 rarity: uncommon
 faces:
   - name: "Fire"

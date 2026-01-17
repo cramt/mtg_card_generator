@@ -1,6 +1,7 @@
 # Modal DFC card
 name: "Emeria's Call"
 type: modal_dfc
+type_line: "Sorcery // Land"
 rarity: mythic
 faces:
   - name: "Emeria's Call"

@@ -8,9 +8,9 @@ repository = "https://github.com/cramt/mtg_card_generator"
 
 [dependencies]
 # Facet - reflection-based serialization and CLI
-facet = "0.42"
-facet-yaml = "0.42"
-facet-args = "0.42"
+facet = { git = "https://github.com/facet-rs/facet.git", branch = "main" }
+facet-yaml = { git = "https://github.com/facet-rs/facet.git", branch = "main" }
+facet-args = { git = "https://github.com/facet-rs/facet.git", branch = "main" }
 
 # HTML templating
 maud = "0.27"

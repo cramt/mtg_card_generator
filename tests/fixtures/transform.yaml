@@ -1,6 +1,7 @@
 # Transform DFC card
 name: "Delver of Secrets"
 type: transform
+type_line: "Creature — Human Wizard"
 rarity: common
 faces:
   - name: "Delver of Secrets"

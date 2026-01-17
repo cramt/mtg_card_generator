@@ -1,6 +1,7 @@
 # Flip card (Kamigawa-style)
 name: "Akki Lavarunner"
 type: flip
+type_line: "Creature — Goblin Warrior"
 rarity: rare
 faces:
   - name: "Akki Lavarunner"
