@@ -15,8 +15,8 @@ A CLI tool for generating Magic: The Gathering card images from YAML definitions
 
 | Component          | Choice            | Rationale                                      |
 | ------------------ | ----------------- | ---------------------------------------------- |
-| CLI framework      | `clap`            | Industry standard, derive macros               |
-| YAML parsing       | `serde_yaml`      | Type-safe deserialization                      |
+| CLI framework      | `facet-args`      | Reflection-based CLI parsing                   |
+| YAML parsing       | `facet-yaml`      | Type-safe deserialization via facet            |
 | HTML templating    | `maud`            | Compile-time, type-safe, lightweight           |
 | Browser automation | `chromiumoxide`   | Async, well-maintained, just needs Chrome      |
 | Async runtime      | `tokio`           | Required by chromiumoxide                      |
@@ -227,6 +227,8 @@ rarity: mythic
 
 ### Battle Cards
 
+**Note**: Battle cards use a different schema than other double-faced cards. Instead of a `faces` array, they use separate `backside_*` fields.
+
 ```yaml
 name: "Invasion of Gobakhan"
 mana_cost: "{1}{W}"
@@ -234,11 +236,9 @@ type_line: "Battle — Siege"
 type: battle
 defense: 3
 rules_text: "When Invasion of Gobakhan enters the battlefield, look at target opponent's hand. You may exile a nonland card from it. For as long as that card remains exiled, its owner may play it. A spell cast this way costs {2} more to cast."
-faces:
-  - # Front face uses top-level fields
-  - name: "Lightshield Array"
-    type_line: "Enchantment"
-    rules_text: "At the beginning of your end step, put a +1/+1 counter on each creature that attacked this turn.\nSacrifice Lightshield Array: Creatures you control gain hexproof and indestructible until end of turn."
+backside_name: "Lightshield Array"
+backside_type_line: "Enchantment"
+backside_rules_text: "At the beginning of your end step, put a +1/+1 counter on each creature that attacked this turn.\nSacrifice Lightshield Array: Creatures you control gain hexproof and indestructible until end of turn."
 rarity: rare
 ```
 
@@ -283,23 +283,25 @@ rarity: rare
 
 ### Leveler Cards
 
+**Note**: Leveler cards use `leveler_ranges` instead of `levels` for the field name.
+
 ```yaml
 name: "Kargan Dragonlord"
 mana_cost: "{R}{R}"
 type_line: "Creature — Human Warrior"
 type: leveler
 rules_text: "Level up {R}"
-levels:
+leveler_ranges:
   - range: [0, 3]
-    power: 2
-    toughness: 2
+    power: "2"
+    toughness: "2"
   - range: [4, 7]
-    power: 4
-    toughness: 4
+    power: "4"
+    toughness: "4"
     text: "Flying"
   - range: [8, null]  # null means 8+
-    power: 8
-    toughness: 8
+    power: "8"
+    toughness: "8"
     text: "Flying, trample\n{R}: Kargan Dragonlord gets +1/+0 until end of turn."
 rarity: mythic
 ```

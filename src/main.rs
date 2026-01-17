@@ -1,6 +1,6 @@
 use facet::Facet;
-use std::path::{Path, PathBuf};
 use mtg_gen::*;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 #[derive(Facet, Debug)]
@@ -70,9 +70,8 @@ async fn process_file(file: &Path, args: &Args, renderer: &Renderer) -> anyhow::
     };
 
     let output_path = args.output.join(relative_path).with_extension("png");
-    
+
     renderer.render_card(&card, &output_path).await?;
 
     Ok(())
 }
-
