@@ -37,9 +37,9 @@ pub struct ClassLevel {
     pub text: String,
 }
 
-/// An adventure card's adventure half
+/// An adventure spell (the left side of an adventure card)
 #[derive(Facet, Debug, Clone)]
-pub struct AdventureCard {
+pub struct AdventureSpell {
     /// The adventure spell name
     pub name: String,
     /// The adventure spell's mana cost
@@ -132,99 +132,171 @@ pub struct CardBase {
     pub rarity: Rarity,
 }
 
-/// Variant-specific data for different card types
+// ============================================================================
+// Card Type Structs
+// ============================================================================
+
+/// A standard card (creature, instant, sorcery, enchantment, artifact)
+#[derive(Facet, Debug, Clone)]
+pub struct NormalCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+}
+
+/// A planeswalker card with loyalty abilities
+#[derive(Facet, Debug, Clone)]
+pub struct PlaneswalkerCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub loyalty: LoyaltyValue,
+    pub loyalty_abilities: Vec<LoyaltyAbility>,
+}
+
+/// A saga enchantment with chapter abilities
+#[derive(Facet, Debug, Clone)]
+pub struct SagaCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub chapters: Vec<SagaChapter>,
+}
+
+/// A class enchantment with level-up abilities
+#[derive(Facet, Debug, Clone)]
+pub struct ClassCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub levels: Vec<ClassLevel>,
+}
+
+/// An adventure card (creature with an adventure spell)
+#[derive(Facet, Debug, Clone)]
+pub struct AdventureCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub adventure: AdventureSpell,
+}
+
+/// A split card (two spells side-by-side, like Fire // Ice)
+#[derive(Facet, Debug, Clone)]
+pub struct SplitCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub faces: Vec<CardFace>,
+    #[facet(default)]
+    pub fuse: Option<bool>,
+    #[facet(default)]
+    pub aftermath: Option<bool>,
+}
+
+/// A flip card (Kamigawa-style, rotated bottom half)
+#[derive(Facet, Debug, Clone)]
+pub struct FlipCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub faces: Vec<CardFace>,
+}
+
+/// A transform double-faced card (like Delver of Secrets)
+#[derive(Facet, Debug, Clone)]
+pub struct TransformCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub faces: Vec<CardFace>,
+}
+
+/// A modal double-faced card (either side playable)
+#[derive(Facet, Debug, Clone)]
+pub struct ModalDfcCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub faces: Vec<CardFace>,
+}
+
+/// A battle card with defense counter
+#[derive(Facet, Debug, Clone)]
+pub struct BattleCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub defense: u32,
+    pub backside_name: String,
+    pub backside_type_line: String,
+    pub backside_rules_text: String,
+}
+
+/// A meld card (two cards that combine into one)
+#[derive(Facet, Debug, Clone)]
+pub struct MeldCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub faces: Vec<CardFace>,
+}
+
+/// A leveler creature (Rise of the Eldrazi style)
+#[derive(Facet, Debug, Clone)]
+pub struct LevelerCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub leveler_ranges: Vec<LevelerRange>,
+}
+
+/// A prototype card (two casting costs/stats)
+#[derive(Facet, Debug, Clone)]
+pub struct PrototypeCard {
+    #[facet(flatten)]
+    pub base: CardBase,
+    pub prototype: CardFace,
+}
+
+// ============================================================================
+// Card Enum (for parsing)
+// ============================================================================
+
+/// A Magic: The Gathering card.
 ///
-/// Each variant contains a `CardBase` with common fields like name, mana cost, type line, etc.
-/// Use the `base()` method to access the common fields without pattern matching.
+/// This enum represents all possible card layouts. Each variant wraps a
+/// specific card type struct that contains the layout-specific data.
 #[derive(Facet, Debug, Clone)]
 #[facet(tag = "type")]
 #[repr(C)]
 pub enum Card {
     #[facet(rename = "normal")]
-    Normal {
-        #[facet(flatten)]
-        base: CardBase,
-    },
+    Normal(#[facet(flatten)] NormalCard),
+
     #[facet(rename = "planeswalker")]
-    Planeswalker {
-        #[facet(flatten)]
-        base: CardBase,
-        loyalty: LoyaltyValue,
-        loyalty_abilities: Vec<LoyaltyAbility>,
-    },
+    Planeswalker(#[facet(flatten)] PlaneswalkerCard),
+
     #[facet(rename = "saga")]
-    Saga {
-        #[facet(flatten)]
-        base: CardBase,
-        chapters: Vec<SagaChapter>,
-    },
+    Saga(#[facet(flatten)] SagaCard),
+
     #[facet(rename = "class")]
-    Class {
-        #[facet(flatten)]
-        base: CardBase,
-        levels: Vec<ClassLevel>,
-    },
+    Class(#[facet(flatten)] ClassCard),
+
     #[facet(rename = "adventure")]
-    Adventure {
-        #[facet(flatten)]
-        base: CardBase,
-        adventure: AdventureCard,
-    },
+    Adventure(#[facet(flatten)] AdventureCard),
+
     #[facet(rename = "split")]
-    Split {
-        #[facet(flatten)]
-        base: CardBase,
-        faces: Vec<CardFace>,
-        #[facet(default)]
-        fuse: Option<bool>,
-        #[facet(default)]
-        aftermath: Option<bool>,
-    },
+    Split(#[facet(flatten)] SplitCard),
+
     #[facet(rename = "flip")]
-    Flip {
-        #[facet(flatten)]
-        base: CardBase,
-        faces: Vec<CardFace>,
-    },
+    Flip(#[facet(flatten)] FlipCard),
+
     #[facet(rename = "transform")]
-    Transform {
-        #[facet(flatten)]
-        base: CardBase,
-        faces: Vec<CardFace>,
-    },
+    Transform(#[facet(flatten)] TransformCard),
+
     #[facet(rename = "modal_dfc")]
-    ModalDfc {
-        #[facet(flatten)]
-        base: CardBase,
-        faces: Vec<CardFace>,
-    },
+    ModalDfc(#[facet(flatten)] ModalDfcCard),
+
     #[facet(rename = "battle")]
-    Battle {
-        #[facet(flatten)]
-        base: CardBase,
-        defense: u32,
-        backside_name: String,
-        backside_type_line: String,
-        backside_rules_text: String,
-    },
+    Battle(#[facet(flatten)] BattleCard),
+
     #[facet(rename = "meld")]
-    Meld {
-        #[facet(flatten)]
-        base: CardBase,
-        faces: Vec<CardFace>,
-    },
+    Meld(#[facet(flatten)] MeldCard),
+
     #[facet(rename = "leveler")]
-    Leveler {
-        #[facet(flatten)]
-        base: CardBase,
-        leveler_ranges: Vec<LevelerRange>,
-    },
+    Leveler(#[facet(flatten)] LevelerCard),
+
     #[facet(rename = "prototype")]
-    Prototype {
-        #[facet(flatten)]
-        base: CardBase,
-        prototype: CardFace,
-    },
+    Prototype(#[facet(flatten)] PrototypeCard),
 }
 
 impl Card {
@@ -235,19 +307,19 @@ impl Card {
     #[must_use]
     pub fn base(&self) -> &CardBase {
         match self {
-            Card::Normal { base }
-            | Card::Planeswalker { base, .. }
-            | Card::Saga { base, .. }
-            | Card::Class { base, .. }
-            | Card::Adventure { base, .. }
-            | Card::Split { base, .. }
-            | Card::Flip { base, .. }
-            | Card::Transform { base, .. }
-            | Card::ModalDfc { base, .. }
-            | Card::Battle { base, .. }
-            | Card::Meld { base, .. }
-            | Card::Leveler { base, .. }
-            | Card::Prototype { base, .. } => base,
+            Card::Normal(card) => &card.base,
+            Card::Planeswalker(card) => &card.base,
+            Card::Saga(card) => &card.base,
+            Card::Class(card) => &card.base,
+            Card::Adventure(card) => &card.base,
+            Card::Split(card) => &card.base,
+            Card::Flip(card) => &card.base,
+            Card::Transform(card) => &card.base,
+            Card::ModalDfc(card) => &card.base,
+            Card::Battle(card) => &card.base,
+            Card::Meld(card) => &card.base,
+            Card::Leveler(card) => &card.base,
+            Card::Prototype(card) => &card.base,
         }
     }
 

@@ -5,8 +5,9 @@ pub mod utils;
 
 // Re-export main types from card module
 pub use card::{
-    AdventureCard, Card, CardBase, CardFace, ClassLevel, LevelerRange, LoyaltyAbility, Rarity,
-    SagaChapter,
+    AdventureCard, AdventureSpell, BattleCard, Card, CardBase, CardFace, ClassCard, ClassLevel,
+    FlipCard, LevelerCard, LevelerRange, LoyaltyAbility, MeldCard, ModalDfcCard, NormalCard,
+    PlaneswalkerCard, PrototypeCard, Rarity, SagaCard, SagaChapter, SplitCard, TransformCard,
 };
 
 // Re-export mana types
@@ -15,8 +16,8 @@ pub use mana::{
     LoyaltyCost, LoyaltyCostProxy, LoyaltyValue, LoyaltyValueProxy, ManaCostParseError, ManaSymbol,
 };
 
-// Re-export renderer
-pub use render::Renderer;
+// Re-export renderer and rendering utilities
+pub use render::{RenderableCard, Renderer};
 
 // Re-export utilities
 pub use utils::sanitize_card_name;

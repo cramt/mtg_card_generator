@@ -12,7 +12,8 @@ fn test_parse_normal_creature() {
     let yaml = read_fixture("normal_creature");
     let card: Card = from_str(&yaml).expect("Failed to parse normal creature");
 
-    if let Card::Normal { base } = card {
+    if let Card::Normal(normal) = card {
+        let base = &normal.base;
         assert_eq!(base.name, "Llanowar Elves");
         let mana = base
             .mana_cost
@@ -43,19 +44,14 @@ fn test_parse_planeswalker() {
     let yaml = read_fixture("planeswalker");
     let card: Card = from_str(&yaml).expect("Failed to parse planeswalker");
 
-    if let Card::Planeswalker {
-        base,
-        loyalty,
-        loyalty_abilities,
-    } = card
-    {
-        assert_eq!(base.name, "Jace, the Mind Sculptor");
-        assert_eq!(loyalty, LoyaltyValue::Numeric(3));
-        assert_eq!(loyalty_abilities.len(), 4);
-        assert_eq!(loyalty_abilities[0].cost, LoyaltyCost::Plus(2));
-        assert_eq!(loyalty_abilities[1].cost, LoyaltyCost::Zero);
-        assert_eq!(loyalty_abilities[2].cost, LoyaltyCost::Minus(1));
-        assert_eq!(loyalty_abilities[3].cost, LoyaltyCost::Minus(12));
+    if let Card::Planeswalker(pw) = card {
+        assert_eq!(pw.base.name, "Jace, the Mind Sculptor");
+        assert_eq!(pw.loyalty, LoyaltyValue::Numeric(3));
+        assert_eq!(pw.loyalty_abilities.len(), 4);
+        assert_eq!(pw.loyalty_abilities[0].cost, LoyaltyCost::Plus(2));
+        assert_eq!(pw.loyalty_abilities[1].cost, LoyaltyCost::Zero);
+        assert_eq!(pw.loyalty_abilities[2].cost, LoyaltyCost::Minus(1));
+        assert_eq!(pw.loyalty_abilities[3].cost, LoyaltyCost::Minus(12));
     } else {
         panic!("Expected Planeswalker variant");
     }
@@ -66,12 +62,12 @@ fn test_parse_saga() {
     let yaml = read_fixture("saga");
     let card: Card = from_str(&yaml).expect("Failed to parse saga");
 
-    if let Card::Saga { base, chapters } = card {
-        assert_eq!(base.name, "The Eldest Reborn");
-        assert_eq!(chapters.len(), 3);
-        assert_eq!(chapters[0].chapters, vec![1]);
-        assert_eq!(chapters[1].chapters, vec![2]);
-        assert_eq!(chapters[2].chapters, vec![3]);
+    if let Card::Saga(saga) = card {
+        assert_eq!(saga.base.name, "The Eldest Reborn");
+        assert_eq!(saga.chapters.len(), 3);
+        assert_eq!(saga.chapters[0].chapters, vec![1]);
+        assert_eq!(saga.chapters[1].chapters, vec![2]);
+        assert_eq!(saga.chapters[2].chapters, vec![3]);
     } else {
         panic!("Expected Saga variant");
     }
@@ -82,14 +78,14 @@ fn test_parse_class() {
     let yaml = read_fixture("class");
     let card: Card = from_str(&yaml).expect("Failed to parse class");
 
-    if let Card::Class { base, levels } = card {
-        assert_eq!(base.name, "Ranger Class");
-        assert_eq!(levels.len(), 3);
-        assert_eq!(levels[0].level, 1);
-        assert_eq!(levels[0].cost, None);
-        assert_eq!(levels[1].level, 2);
+    if let Card::Class(class) = card {
+        assert_eq!(class.base.name, "Ranger Class");
+        assert_eq!(class.levels.len(), 3);
+        assert_eq!(class.levels[0].level, 1);
+        assert_eq!(class.levels[0].cost, None);
+        assert_eq!(class.levels[1].level, 2);
         assert_eq!(
-            levels[1].cost.as_ref().map(|c| c.to_string()),
+            class.levels[1].cost.as_ref().map(|c| c.to_string()),
             Some("{1}{G}".to_string())
         );
     } else {
@@ -102,15 +98,11 @@ fn test_parse_adventure() {
     let yaml = read_fixture("adventure");
     let card: Card = from_str(&yaml).expect("Failed to parse adventure");
 
-    if let Card::Adventure {
-        base,
-        adventure: adv,
-    } = card
-    {
-        assert_eq!(base.name, "Bonecrusher Giant");
-        assert_eq!(adv.name, "Stomp");
-        assert_eq!(adv.mana_cost.to_string(), "{1}{R}");
-        assert_eq!(adv.type_line, "Instant — Adventure");
+    if let Card::Adventure(adv_card) = card {
+        assert_eq!(adv_card.base.name, "Bonecrusher Giant");
+        assert_eq!(adv_card.adventure.name, "Stomp");
+        assert_eq!(adv_card.adventure.mana_cost.to_string(), "{1}{R}");
+        assert_eq!(adv_card.adventure.type_line, "Instant — Adventure");
     } else {
         panic!("Expected Adventure variant");
     }
@@ -121,17 +113,17 @@ fn test_parse_split() {
     let yaml = read_fixture("split");
     let card: Card = from_str(&yaml).expect("Failed to parse split");
 
-    if let Card::Split { base, faces, .. } = card {
-        assert_eq!(base.name, "Fire // Ice");
-        assert_eq!(faces.len(), 2);
-        assert_eq!(faces[0].name, Some("Fire".to_string()));
+    if let Card::Split(split) = card {
+        assert_eq!(split.base.name, "Fire // Ice");
+        assert_eq!(split.faces.len(), 2);
+        assert_eq!(split.faces[0].name, Some("Fire".to_string()));
         assert_eq!(
-            faces[0].mana_cost.as_ref().map(|c| c.to_string()),
+            split.faces[0].mana_cost.as_ref().map(|c| c.to_string()),
             Some("{1}{R}".to_string())
         );
-        assert_eq!(faces[1].name, Some("Ice".to_string()));
+        assert_eq!(split.faces[1].name, Some("Ice".to_string()));
         assert_eq!(
-            faces[1].mana_cost.as_ref().map(|c| c.to_string()),
+            split.faces[1].mana_cost.as_ref().map(|c| c.to_string()),
             Some("{1}{U}".to_string())
         );
     } else {
@@ -144,12 +136,21 @@ fn test_parse_transform_dfc() {
     let yaml = read_fixture("transform");
     let card: Card = from_str(&yaml).expect("Failed to parse transform DFC");
 
-    if let Card::Transform { base, faces } = card {
-        assert_eq!(base.name, "Delver of Secrets");
-        assert_eq!(faces.len(), 2);
-        assert_eq!(faces[0].name, Some("Delver of Secrets".to_string()));
-        assert_eq!(faces[1].name, Some("Insectile Aberration".to_string()));
-        assert_eq!(faces[1].color_indicator, Some(vec!["blue".to_string()]));
+    if let Card::Transform(transform) = card {
+        assert_eq!(transform.base.name, "Delver of Secrets");
+        assert_eq!(transform.faces.len(), 2);
+        assert_eq!(
+            transform.faces[0].name,
+            Some("Delver of Secrets".to_string())
+        );
+        assert_eq!(
+            transform.faces[1].name,
+            Some("Insectile Aberration".to_string())
+        );
+        assert_eq!(
+            transform.faces[1].color_indicator,
+            Some(vec!["blue".to_string()])
+        );
     } else {
         panic!("Expected Transform variant");
     }
@@ -160,12 +161,12 @@ fn test_parse_modal_dfc() {
     let yaml = read_fixture("modal_dfc");
     let card: Card = from_str(&yaml).expect("Failed to parse modal DFC");
 
-    if let Card::ModalDfc { base, faces } = card {
-        assert_eq!(base.name, "Emeria's Call");
-        assert_eq!(faces.len(), 2);
-        assert_eq!(faces[0].name, Some("Emeria's Call".to_string()));
+    if let Card::ModalDfc(mdfc) = card {
+        assert_eq!(mdfc.base.name, "Emeria's Call");
+        assert_eq!(mdfc.faces.len(), 2);
+        assert_eq!(mdfc.faces[0].name, Some("Emeria's Call".to_string()));
         assert_eq!(
-            faces[1].name,
+            mdfc.faces[1].name,
             Some("Emeria, Shattered Skyclave".to_string())
         );
     } else {
@@ -178,9 +179,9 @@ fn test_parse_battle() {
     let yaml = read_fixture("battle");
     let card: Card = from_str(&yaml).expect("Failed to parse battle");
 
-    if let Card::Battle { base, defense, .. } = card {
-        assert_eq!(base.name, "Invasion of Gobakhan");
-        assert_eq!(defense, 3);
+    if let Card::Battle(battle) = card {
+        assert_eq!(battle.base.name, "Invasion of Gobakhan");
+        assert_eq!(battle.defense, 3);
     } else {
         panic!("Expected Battle variant");
     }
@@ -191,9 +192,9 @@ fn test_parse_flip() {
     let yaml = read_fixture("flip");
     let card: Card = from_str(&yaml).expect("Failed to parse flip");
 
-    if let Card::Flip { base, faces } = card {
-        assert_eq!(base.name, "Akki Lavarunner");
-        assert_eq!(faces.len(), 2);
+    if let Card::Flip(flip) = card {
+        assert_eq!(flip.base.name, "Akki Lavarunner");
+        assert_eq!(flip.faces.len(), 2);
     } else {
         panic!("Expected Flip variant");
     }
@@ -204,16 +205,12 @@ fn test_parse_leveler() {
     let yaml = read_fixture("leveler");
     let card: Card = from_str(&yaml).expect("Failed to parse leveler");
 
-    if let Card::Leveler {
-        base,
-        leveler_ranges,
-    } = card
-    {
-        assert_eq!(base.name, "Kargan Dragonlord");
-        assert_eq!(leveler_ranges.len(), 3);
-        assert_eq!(leveler_ranges[0].power, Some("2".to_string()));
-        assert_eq!(leveler_ranges[1].text, Some("Flying".to_string()));
-        assert!(leveler_ranges[2].text.is_some());
+    if let Card::Leveler(leveler) = card {
+        assert_eq!(leveler.base.name, "Kargan Dragonlord");
+        assert_eq!(leveler.leveler_ranges.len(), 3);
+        assert_eq!(leveler.leveler_ranges[0].power, Some("2".to_string()));
+        assert_eq!(leveler.leveler_ranges[1].text, Some("Flying".to_string()));
+        assert!(leveler.leveler_ranges[2].text.is_some());
     } else {
         panic!("Expected Leveler variant");
     }
@@ -224,18 +221,18 @@ fn test_parse_prototype() {
     let yaml = read_fixture("prototype");
     let card: Card = from_str(&yaml).expect("Failed to parse prototype");
 
-    if let Card::Prototype {
-        base,
-        prototype: proto,
-    } = card
-    {
-        assert_eq!(base.name, "Phyrexian Fleshgorger");
+    if let Card::Prototype(proto_card) = card {
+        assert_eq!(proto_card.base.name, "Phyrexian Fleshgorger");
         assert_eq!(
-            proto.mana_cost.as_ref().map(|c| c.to_string()),
+            proto_card
+                .prototype
+                .mana_cost
+                .as_ref()
+                .map(|c| c.to_string()),
             Some("{1}{B}{B}".to_string())
         );
-        assert_eq!(proto.power, Some("3".to_string()));
-        assert_eq!(proto.toughness, Some("3".to_string()));
+        assert_eq!(proto_card.prototype.power, Some("3".to_string()));
+        assert_eq!(proto_card.prototype.toughness, Some("3".to_string()));
     } else {
         panic!("Expected Prototype variant");
     }
