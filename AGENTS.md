@@ -41,6 +41,22 @@ mtg_card_generator/
 │   ├── parsing.rs      # Card parsing tests (all passing)
 │   ├── mana.rs         # Mana parsing tests
 │   └── fixtures/       # 12 YAML test files covering all card types
+├── mtgrender/          # Asset repository (submodule/reference)
+│   └── client/src/assets/
+│       ├── img/        # Card frame assets (PNG/WebP)
+│       │   ├── frames/           # Standard card frames by color
+│       │   ├── extended_frames/  # Extended art frames
+│       │   ├── planeswalker_frames/
+│       │   ├── saga_frames/
+│       │   ├── class_frames/
+│       │   ├── adventure_frames/
+│       │   ├── transform_frames/
+│       │   ├── mdfc_frames/
+│       │   ├── leveler_frames/
+│       │   ├── boxes/            # Text boxes, P/T boxes
+│       │   ├── legendary_crowns/ # Legendary crown overlays
+│       │   └── symbols/          # Mana symbols (SVG)
+│       └── fonts/      # MTG fonts (Beleren, MPlantin, Matrix)
 ├── output/             # Default output directory for generated images
 ├── SPEC.md             # Comprehensive specification (379 lines)
 ├── Cargo.toml          # Dependencies and metadata
@@ -243,9 +259,86 @@ All project tasks are tracked in **TODO.md**. This file contains:
 
 Refer to TODO.md for the complete task list and implementation order.
 
+## Asset Repository (mtgrender/)
+
+The `mtgrender/` directory contains a complete set of high-quality MTG card assets sourced from the mtgrender project. **Use these real assets for professional-looking card renders.**
+
+### Available Assets
+
+**Card Frames** (`mtgrender/client/src/assets/img/`):
+- `frames/` - Standard card frames (W, U, B, R, G, Gold, Artifact, Colourless, Land)
+- `extended_frames/` - Extended art frames for all color combinations
+- `planeswalker_frames/` - Planeswalker card frames (including large format)
+- `saga_frames/` - Saga card frames with chapter markers
+- `class_frames/` - Class enchantment frames
+- `adventure_frames/` - Adventure card frames (including extended)
+- `transform_frames/` - Transform DFC frames (front and back)
+- `mdfc_frames/` - Modal DFC frames
+- `leveler_frames/` - Leveler creature frames
+- `masterpiece_frames/` - Masterpiece/Invocation style frames
+
+**Text Boxes & Overlays**:
+- `boxes/` - Text boxes by color
+- `pt_boxes/` - Power/Toughness boxes
+- `planeswalker_boxes/` - Planeswalker text boxes
+- `saga_textboxes/` - Saga ability text boxes
+- `legendary_crowns/` - Legendary crown overlays (including extended)
+- `color_indicators/` - Color indicator dots
+
+**Backgrounds**:
+- `bg/` - Standard card backgrounds
+- `extended_bg/` - Extended art backgrounds
+- `planeswalker_bg/` - Planeswalker backgrounds
+- `saga_bg/` - Saga backgrounds
+- `transform_bg/` - Transform card backgrounds
+
+**Symbols & Icons**:
+- `symbols/` - Mana symbols (SVG format, 0-20, X, Y, Z, W, U, B, R, G, C, hybrid, Phyrexian, etc.)
+- `set_icons/` - Set symbols
+- `mdfc_icons/` - Modal DFC icons
+- `transform_icons/` - Transform card icons
+
+**Fonts** (`mtgrender/client/src/assets/fonts/`):
+- `beleren-bold_P1.01.ttf` - Beleren Bold (card names)
+- `belerensmallcaps-bold.ttf` - Beleren Small Caps (type lines)
+- `MPlantin-Italic.ttf` - MPlantin Italic (flavor text)
+- `mplantin.ttf` - MPlantin (rules text)
+- `MatrixBold.ttf` - Matrix Bold (power/toughness)
+- `relay-medium.ttf` - Relay Medium (planeswalker abilities)
+
+**Symbology Data**:
+- `mtgrender/data/symbology.json` - Complete Scryfall symbology data with SVG URLs
+
+### Asset Usage Guidelines
+
+1. **Frame Selection**: Choose frames based on card colors:
+   - Monocolor: Use single-color frames (W.png, U.png, B.png, R.png, G.png)
+   - Multicolor (2+ colors): Use Gold.png
+   - Colorless: Use Colourless.png
+   - Artifacts: Use Artifact.png
+   - Lands: Use Land.png
+
+2. **File Formats**: Assets are available in both PNG and WebP formats. Use PNG for compatibility.
+
+3. **Mana Symbols**: 
+   - Local SVG symbols available in `mtgrender/client/src/assets/img/symbols/`
+   - Scryfall CDN URLs available in `mtgrender/data/symbology.json`
+   - Prefer local assets for offline rendering
+
+4. **Font Loading**: Use `@font-face` in CSS to load MTG-specific fonts for authentic appearance
+
+5. **Layering**: Typical layer order (bottom to top):
+   - Background
+   - Frame
+   - Text boxes
+   - Legendary crown (if applicable)
+   - Text content
+   - Symbols/icons
+
 ## References
 
-- **Scryfall API**: Used for mana symbol SVGs (https://svgs.scryfall.io/card-symbols/)
+- **mtgrender Assets**: Local asset repository in `mtgrender/` directory
+- **Scryfall API**: Symbology data and fallback SVG URLs (https://svgs.scryfall.io/card-symbols/)
 - **MTG Comprehensive Rules**: For card layout specifications
 - **Facet Documentation**: For understanding the serialization framework
 - **Maud Documentation**: For HTML templating syntax

@@ -1,3 +1,30 @@
+//! Card rendering module
+//!
+//! This module handles rendering MTG cards to HTML and capturing them as PNG images.
+//!
+//! # Asset Repository
+//!
+//! The `mtgrender/` directory contains high-quality MTG card assets that should be used
+//! for professional-looking renders:
+//!
+//! - **Card Frames**: `mtgrender/client/src/assets/img/frames/` (W.png, U.png, B.png, etc.)
+//! - **Mana Symbols**: `mtgrender/client/src/assets/img/symbols/` (SVG files)
+//! - **Fonts**: `mtgrender/client/src/assets/fonts/` (Beleren, MPlantin, Matrix)
+//! - **Text Boxes**: `mtgrender/client/src/assets/img/boxes/` (color-specific text boxes)
+//! - **P/T Boxes**: `mtgrender/client/src/assets/img/pt_boxes/`
+//! - **Legendary Crowns**: `mtgrender/client/src/assets/img/legendary_crowns/`
+//!
+//! See AGENTS.md for complete asset documentation and usage guidelines.
+//!
+//! # Current Implementation Status
+//!
+//! - ✅ Mana symbol rendering (using Scryfall CDN URLs)
+//! - ✅ Frame color derivation from mana costs
+//! - ⚠️  Frame rendering (currently CSS gradients, should use real frame images)
+//! - ⚠️  Font loading (currently generic fonts, should use MTG fonts)
+//! - ❌ Planeswalker rendering (marked todo!())
+//! - ❌ Saga, Adventure, Transform, and other special layouts
+
 use crate::card::{Card, ClassLevel, LoyaltyAbility};
 use crate::mana::{ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyValue, ManaSymbol};
 use anyhow::Result;
