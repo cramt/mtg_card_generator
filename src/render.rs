@@ -335,22 +335,50 @@ impl Renderer {
                 .frame-colorless { background-image: url('file://"# (assets_base.join("img/bg/Colourless.png").display()) r#"'); }
                 .frame-land { background-image: url('file://"# (assets_base.join("img/bg/Land.png").display()) r#"'); }
 
+                /* Text box backgrounds */
+                .text-box-white { background-image: url('file://"# (assets_base.join("img/boxes/W.png").display()) r#"'); }
+                .text-box-blue { background-image: url('file://"# (assets_base.join("img/boxes/U.png").display()) r#"'); }
+                .text-box-black { background-image: url('file://"# (assets_base.join("img/boxes/B.png").display()) r#"'); }
+                .text-box-red { background-image: url('file://"# (assets_base.join("img/boxes/R.png").display()) r#"'); }
+                .text-box-green { background-image: url('file://"# (assets_base.join("img/boxes/G.png").display()) r#"'); }
+                .text-box-gold { background-image: url('file://"# (assets_base.join("img/boxes/Gold.png").display()) r#"'); }
+                .text-box-artifact { background-image: url('file://"# (assets_base.join("img/boxes/Artifact.png").display()) r#"'); }
+                .text-box-colorless { background-image: url('file://"# (assets_base.join("img/boxes/Colourless.png").display()) r#"'); }
+                .text-box-land { background-image: url('file://"# (assets_base.join("img/boxes/Land.png").display()) r#"'); }
+
+                /* P/T box backgrounds */
+                .pt-box-white { background-image: url('file://"# (assets_base.join("img/pt_boxes/W.png").display()) r#"'); }
+                .pt-box-blue { background-image: url('file://"# (assets_base.join("img/pt_boxes/U.png").display()) r#"'); }
+                .pt-box-black { background-image: url('file://"# (assets_base.join("img/pt_boxes/B.png").display()) r#"'); }
+                .pt-box-red { background-image: url('file://"# (assets_base.join("img/pt_boxes/R.png").display()) r#"'); }
+                .pt-box-green { background-image: url('file://"# (assets_base.join("img/pt_boxes/G.png").display()) r#"'); }
+                .pt-box-gold { background-image: url('file://"# (assets_base.join("img/pt_boxes/Gold.png").display()) r#"'); }
+                .pt-box-artifact { background-image: url('file://"# (assets_base.join("img/pt_boxes/Artifact.png").display()) r#"'); }
+                .pt-box-colorless { background-image: url('file://"# (assets_base.join("img/pt_boxes/Colourless.png").display()) r#"'); }
+                .pt-box-land { background-image: url('file://"# (assets_base.join("img/pt_boxes/Land.png").display()) r#"'); }
+
                 /* Header section */
                 .card-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     padding: 12px 16px;
-                    background: rgba(0, 0, 0, 0.6);
-                    border-radius: 12px;
+                    /* background: rgba(0, 0, 0, 0.6); */
+                    /* border-radius: 12px; */
                     margin-bottom: 16px;
+                    position: absolute;
+                    top: 28px;
+                    left: 28px;
+                    width: 688px; /* 744 - 28*2 */
+                    height: 40px;
+                    z-index: 10;
                 }
 
                 .card-name {
-                    font-size: 28px;
+                    font-size: 26px;
                     font-weight: bold;
-                    color: #fff;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                    color: #000;
+                    font-family: 'Beleren', serif;
                 }
 
                 .mana-cost-container {
@@ -381,42 +409,99 @@ impl Renderer {
 
                 /* Art box */
                 .art-box {
-                    width: 100%;
-                    height: 420px;
+                    position: absolute;
+                    top: 80px;
+                    left: 36px;
+                    width: 672px;
+                    height: 490px;
                     background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-                    border-radius: 12px;
-                    margin-bottom: 16px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: #666;
                     font-size: 18px;
-                    border: 2px solid rgba(0, 0, 0, 0.4);
+                    border: 1px solid #000;
+                    z-index: 5;
                 }
 
                 /* Type line */
                 .type-line {
-                    padding: 10px 16px;
-                    background: rgba(0, 0, 0, 0.6);
-                    border-radius: 8px;
-                    margin-bottom: 12px;
+                    position: absolute;
+                    top: 600px;
+                    left: 28px;
+                    width: 688px;
+                    height: 38px;
+                    display: flex;
+                    align-items: center;
+                    padding-left: 8px;
+                    z-index: 10;
                 }
 
                 .type-text {
-                    font-size: 20px;
+                    font-size: 24px;
                     font-weight: bold;
-                    color: #fff;
-                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                    color: #000;
+                    font-family: 'Beleren', serif;
                 }
 
                 /* Text box */
                 .text-box {
-                    flex: 1;
-                    padding: 16px;
-                    background: rgba(255, 255, 255, 0.9);
-                    border-radius: 8px;
+                    position: absolute;
+                    top: 640px; /* Shifted up slightly to reduce gap */
+                    left: 36px;
+                    width: 672px;
+                    height: 330px; /* Increased height slightly */
+                    padding: 24px 32px;
+                    background-size: 100% 100%;
+                    z-index: 5;
+                    font-family: 'MPlantin', serif;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    gap: 12px;
+                }
+
+                .rules-text {
+                    font-size: 24px; /* Increased from 16px */
+                    line-height: 1.3;
+                    color: #000;
                     margin-bottom: 12px;
-                    overflow: hidden;
+                }
+                
+                /* ... skipping inner classes ... */
+
+                .flavor-text {
+                    font-size: 22px; /* Increased from 14px */
+                    font-style: italic;
+                    color: #000;
+                    line-height: 1.2;
+                    /* border-top removed, separator usually handled by spacing or line */
+                    padding-top: 8px;
+                    margin-top: 8px;
+                }
+
+                /* Power/Toughness box */
+                .pt-box {
+                    position: absolute;
+                    bottom: 26px;
+                    right: 26px;
+                    width: 90px;
+                    height: 64px;
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 20;
+                }
+
+                .pt-text {
+                    font-size: 36px;
+                    font-weight: bold;
+                    color: #000;
+                    font-family: 'Matrix', serif;
+                    padding-top: 6px;
+                    padding-left: 6px;
                 }
 
                 .rules-text {
@@ -558,6 +643,8 @@ impl Renderer {
     fn render_normal_card(&self, base: &crate::card::CardBase) -> Markup {
         let frame_color = Self::derive_frame_color(&base.mana_cost);
         let frame_class = format!("frame-{}", frame_color);
+        let text_box_class = format!("text-box-{}", frame_color);
+        let pt_box_class = format!("pt-box-{}", frame_color);
 
         let rarity_class = match base.rarity {
             crate::card::Rarity::Common => "rarity-common",
@@ -594,7 +681,7 @@ impl Renderer {
                             }
 
                             // Text box
-                            div.text-box {
+                            div class=(format!("text-box {}", text_box_class)) {
                                 @if let Some(ref rules) = base.rules_text {
                                     div.rules-text {
                                         (Self::render_rules_text(rules))
@@ -609,7 +696,7 @@ impl Renderer {
 
                             // Power/Toughness box (if creature)
                             @if let (Some(power), Some(toughness)) = (&base.power, &base.toughness) {
-                                div.pt-box {
+                                div class=(format!("pt-box {}", pt_box_class)) {
                                     div.pt-text { (power) "/" (toughness) }
                                 }
                             }
