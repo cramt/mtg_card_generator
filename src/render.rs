@@ -42,7 +42,12 @@ pub struct Renderer {
 
 impl Renderer {
     pub async fn new() -> Result<Self> {
-        let mut config = BrowserConfig::builder().no_sandbox();
+        let mut config = BrowserConfig::builder()
+            .no_sandbox()
+            .arg("--disable-web-security")
+            .arg("--allow-file-access-from-files")
+            .arg("--disable-features=IsolateOrigins,site-per-process")
+            .arg("--disable-blink-features=AutomationControlled");
 
         if let Ok(path) = std::env::var("CHROME_PATH") {
             config = config.chrome_executable(path);
@@ -613,12 +618,24 @@ impl Renderer {
 
         page.execute(metrics).await?;
 
-        // Load the HTML content
+        // Save HTML to temporary file and navigate to it
+        // (set_content doesn't provide a base URL for external resources)
         let html_string = html.into_string();
-        page.set_content(&html_string).await?;
+        let temp_html = std::env::temp_dir().join(format!("mtg_card_{}.html", std::process::id()));
+        std::fs::write(&temp_html, &html_string)?;
+        eprintln!("Debug: HTML saved to {}", temp_html.display());
 
-        // Wait a bit for content to render
-        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+        let file_url = format!("file://{}", temp_html.display());
+        page.goto(&file_url).await?;
+
+        // Wait for page to fully load including external resources
+        page.wait_for_navigation().await?;
+
+        // Additional wait to ensure SVGs are rendered
+        tokio::time::sleep(tokio::time::Duration::from_millis(3000)).await;
+
+        // Keep temp file for debugging
+        // let _ = std::fs::remove_file(&temp_html);
 
         // Ensure output directory exists
         if let Some(parent) = output_path.parent() {
