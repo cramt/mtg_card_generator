@@ -1,5 +1,6 @@
 use crate::mana::{
-    CastingManaCost, CastingManaCostProxy, LoyaltyCost, LoyaltyCostProxy, LoyaltyValue,
+    CastingManaCost, CastingManaCostProxy, LoyaltyCost, LoyaltyCostProxy, LoyaltyValue, RulesText,
+    RulesTextProxy,
 };
 use facet::Facet;
 
@@ -22,7 +23,8 @@ pub struct SagaChapter {
     /// Chapter numbers this ability applies to
     pub chapters: Vec<u32>,
     /// The chapter text
-    pub text: String,
+    #[facet(proxy = RulesTextProxy)]
+    pub text: RulesText,
 }
 
 /// A level in a class enchantment
@@ -34,7 +36,8 @@ pub struct ClassLevel {
     #[facet(default, proxy = CastingManaCostProxy)]
     pub cost: Option<CastingManaCost>,
     /// Ability text for this level
-    pub text: String,
+    #[facet(proxy = RulesTextProxy)]
+    pub text: RulesText,
 }
 
 /// An adventure spell (the left side of an adventure card)
@@ -48,7 +51,8 @@ pub struct AdventureSpell {
     /// The adventure spell's type
     pub type_line: String,
     /// The adventure spell's rules text
-    pub rules_text: String,
+    #[facet(proxy = RulesTextProxy)]
+    pub rules_text: RulesText,
 }
 
 /// A loyalty ability on a planeswalker
@@ -58,7 +62,8 @@ pub struct LoyaltyAbility {
     #[facet(proxy = LoyaltyCostProxy)]
     pub cost: LoyaltyCost,
     /// Ability text
-    pub text: String,
+    #[facet(proxy = RulesTextProxy)]
+    pub text: RulesText,
 }
 
 /// A level range for leveler creatures
@@ -73,8 +78,8 @@ pub struct LevelerRange {
     #[facet(default)]
     pub toughness: Option<String>,
     /// Ability text for this range
-    #[facet(default)]
-    pub text: Option<String>,
+    #[facet(default, proxy = RulesTextProxy)]
+    pub text: Option<RulesText>,
 }
 
 /// A card face (for DFC, split, flip, etc.)
@@ -90,8 +95,8 @@ pub struct CardFace {
     #[facet(default)]
     pub type_line: Option<String>,
     /// Rules text
-    #[facet(default)]
-    pub rules_text: Option<String>,
+    #[facet(default, proxy = RulesTextProxy)]
+    pub rules_text: Option<RulesText>,
     /// Flavor text
     #[facet(default)]
     pub flavor_text: Option<String>,
@@ -117,8 +122,8 @@ pub struct CardBase {
     /// Type line
     pub type_line: String,
     /// Rules text (for static abilities, etc.)
-    #[facet(default)]
-    pub rules_text: Option<String>,
+    #[facet(default, proxy = RulesTextProxy)]
+    pub rules_text: Option<RulesText>,
     /// Flavor text
     #[facet(default)]
     pub flavor_text: Option<String>,
@@ -220,7 +225,8 @@ pub struct BattleCard {
     pub defense: u32,
     pub backside_name: String,
     pub backside_type_line: String,
-    pub backside_rules_text: String,
+    #[facet(proxy = RulesTextProxy)]
+    pub backside_rules_text: RulesText,
 }
 
 /// A meld card (two cards that combine into one)

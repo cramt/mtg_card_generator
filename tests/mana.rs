@@ -322,3 +322,104 @@ fn test_loyalty_cost_display() {
     assert_eq!(LoyaltyCost::PlusX.to_string(), "+X");
     assert_eq!(LoyaltyCost::MinusX.to_string(), "-X");
 }
+
+// ============================================================================
+// RulesText Tests
+// ============================================================================
+
+#[test]
+fn test_rules_text_parse_plain_text() {
+    let rules = RulesText::parse("Flying").unwrap();
+    assert_eq!(rules.segments.len(), 1);
+    assert!(matches!(&rules.segments[0], RulesTextSegment::Text(s) if s == "Flying"));
+}
+
+#[test]
+fn test_rules_text_parse_single_symbol() {
+    let rules = RulesText::parse("{T}").unwrap();
+    assert_eq!(rules.segments.len(), 1);
+    assert!(matches!(
+        &rules.segments[0],
+        RulesTextSegment::Symbol(ManaSymbol::Tap)
+    ));
+}
+
+#[test]
+fn test_rules_text_parse_mixed() {
+    let rules = RulesText::parse("{T}: Add {G}.").unwrap();
+    assert_eq!(rules.segments.len(), 4);
+    assert!(matches!(
+        &rules.segments[0],
+        RulesTextSegment::Symbol(ManaSymbol::Tap)
+    ));
+    assert!(matches!(&rules.segments[1], RulesTextSegment::Text(s) if s == ": Add "));
+    assert!(matches!(
+        &rules.segments[2],
+        RulesTextSegment::Symbol(ManaSymbol::Casting(CastingManaSymbol::Green))
+    ));
+    assert!(matches!(&rules.segments[3], RulesTextSegment::Text(s) if s == "."));
+}
+
+#[test]
+fn test_rules_text_parse_complex() {
+    let rules = RulesText::parse("{2}{U}, {T}: Draw a card.").unwrap();
+    // {2} + {U} + ", " + {T} + ": Draw a card." = 5 segments
+    assert_eq!(rules.segments.len(), 5);
+    assert!(matches!(
+        &rules.segments[0],
+        RulesTextSegment::Symbol(ManaSymbol::Casting(CastingManaSymbol::Generic(2)))
+    ));
+    assert!(matches!(
+        &rules.segments[1],
+        RulesTextSegment::Symbol(ManaSymbol::Casting(CastingManaSymbol::Blue))
+    ));
+    assert!(matches!(&rules.segments[2], RulesTextSegment::Text(s) if s == ", "));
+    assert!(matches!(
+        &rules.segments[3],
+        RulesTextSegment::Symbol(ManaSymbol::Tap)
+    ));
+    assert!(matches!(&rules.segments[4], RulesTextSegment::Text(s) if s == ": Draw a card."));
+}
+
+#[test]
+fn test_rules_text_display_roundtrip() {
+    let original = "{T}: Add {G}.";
+    let rules = RulesText::parse(original).unwrap();
+    assert_eq!(rules.to_string(), original);
+}
+
+#[test]
+fn test_rules_text_display_complex_roundtrip() {
+    let original = "{2}{U}, {T}: Draw a card.";
+    let rules = RulesText::parse(original).unwrap();
+    assert_eq!(rules.to_string(), original);
+}
+
+#[test]
+fn test_rules_text_empty() {
+    let rules = RulesText::parse("").unwrap();
+    assert!(rules.is_empty());
+    assert_eq!(rules.len(), 0);
+}
+
+#[test]
+fn test_rules_text_energy_symbol() {
+    let rules = RulesText::parse("Pay {E}{E}{E}: Create a 6/6 Beast.").unwrap();
+    assert_eq!(rules.segments.len(), 5);
+    assert!(matches!(
+        &rules.segments[1],
+        RulesTextSegment::Symbol(ManaSymbol::Energy)
+    ));
+}
+
+#[test]
+fn test_rules_text_unclosed_brace_error() {
+    let result = RulesText::parse("{T: Add mana.");
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_rules_text_unknown_symbol_error() {
+    let result = RulesText::parse("{INVALID}");
+    assert!(result.is_err());
+}

@@ -601,6 +601,173 @@ impl fmt::Display for ManaCostParseError {
 
 impl std::error::Error for ManaCostParseError {}
 
+// ============================================================================
+// Rules Text Types
+// ============================================================================
+
+/// A segment of rules text - either plain text or a mana/action symbol
+#[derive(Facet, Debug, Clone, PartialEq, Eq)]
+#[repr(C)]
+pub enum RulesTextSegment {
+    /// Plain text content
+    Text(String),
+    /// A mana or action symbol (tap, untap, energy, etc.)
+    Symbol(ManaSymbol),
+}
+
+/// Parsed rules text that contains a sequence of text and symbol segments.
+///
+/// This type ensures that rules text is always in a valid, parsed form.
+/// Symbols like `{W}`, `{T}`, `{2}` are represented as `RulesTextSegment::Symbol`
+/// variants, making it impossible to have malformed symbol syntax at runtime.
+#[derive(Facet, Debug, Clone, PartialEq, Eq, Default)]
+#[facet(proxy = RulesTextProxy)]
+pub struct RulesText {
+    pub segments: Vec<RulesTextSegment>,
+}
+
+#[derive(Facet)]
+#[facet(transparent)]
+pub struct RulesTextProxy(pub String);
+
+impl TryFrom<RulesTextProxy> for RulesText {
+    type Error = String;
+    fn try_from(proxy: RulesTextProxy) -> Result<Self, Self::Error> {
+        Self::parse(&proxy.0).map_err(|e| e.to_string())
+    }
+}
+
+impl TryFrom<&RulesText> for RulesTextProxy {
+    type Error = Infallible;
+    fn try_from(v: &RulesText) -> Result<Self, Self::Error> {
+        Ok(RulesTextProxy(v.to_string()))
+    }
+}
+
+impl TryFrom<RulesTextProxy> for Option<RulesText> {
+    type Error = String;
+    fn try_from(proxy: RulesTextProxy) -> Result<Self, Self::Error> {
+        if proxy.0.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(RulesText::try_from(proxy)?))
+        }
+    }
+}
+
+impl TryFrom<&Option<RulesText>> for RulesTextProxy {
+    type Error = Infallible;
+    fn try_from(v: &Option<RulesText>) -> Result<Self, Self::Error> {
+        match v {
+            Some(v) => Ok(RulesTextProxy(v.to_string())),
+            None => Ok(RulesTextProxy(String::new())),
+        }
+    }
+}
+
+impl RulesText {
+    /// Parse a rules text string into segments.
+    ///
+    /// Text outside of `{...}` becomes `RulesTextSegment::Text`.
+    /// Content inside `{...}` is parsed as a mana/action symbol.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if a symbol inside braces cannot be parsed.
+    #[must_use = "parsing returns a Result that should be handled"]
+    pub fn parse(input: &str) -> Result<Self, ManaCostParseError> {
+        let mut segments = Vec::new();
+        let mut current_text = String::new();
+        let bytes = input.as_bytes();
+        let mut i = 0;
+
+        while i < bytes.len() {
+            if bytes[i] == b'{' {
+                // Flush any accumulated text
+                if !current_text.is_empty() {
+                    segments.push(RulesTextSegment::Text(std::mem::take(&mut current_text)));
+                }
+
+                let start = i + 1;
+                let end = bytes[start..]
+                    .iter()
+                    .position(|&b| b == b'}')
+                    .ok_or(ManaCostParseError::UnclosedBrace { position: i })?;
+                let content = std::str::from_utf8(&bytes[start..start + end])
+                    .map_err(|_| ManaCostParseError::InvalidUtf8)?;
+
+                let symbol = Self::parse_symbol(content)?;
+                segments.push(RulesTextSegment::Symbol(symbol));
+                i = start + end + 1;
+            } else {
+                // Regular character - accumulate into current text
+                current_text.push(bytes[i] as char);
+                i += 1;
+            }
+        }
+
+        // Flush any remaining text
+        if !current_text.is_empty() {
+            segments.push(RulesTextSegment::Text(current_text));
+        }
+
+        Ok(RulesText { segments })
+    }
+
+    /// Parse a single symbol from its string representation (without braces).
+    fn parse_symbol(content: &str) -> Result<ManaSymbol, ManaCostParseError> {
+        // First try action-specific symbols
+        match content {
+            "T" => return Ok(ManaSymbol::Tap),
+            "Q" => return Ok(ManaSymbol::Untap),
+            "E" => return Ok(ManaSymbol::Energy),
+            "CHAOS" => return Ok(ManaSymbol::Chaos),
+            _ => {}
+        }
+
+        // Fall back to casting mana symbols
+        CastingManaCost::parse_symbol(content).map(ManaSymbol::Casting)
+    }
+
+    /// Returns true if this rules text is empty (no segments).
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.segments.is_empty()
+    }
+
+    /// Returns the number of segments.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.segments.len()
+    }
+}
+
+impl fmt::Display for RulesText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for segment in &self.segments {
+            match segment {
+                RulesTextSegment::Text(text) => write!(f, "{}", text)?,
+                RulesTextSegment::Symbol(symbol) => write!(f, "{}", symbol)?,
+            }
+        }
+        Ok(())
+    }
+}
+
+impl TryFrom<&str> for RulesText {
+    type Error = ManaCostParseError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        RulesText::parse(s)
+    }
+}
+
+impl TryFrom<String> for RulesText {
+    type Error = ManaCostParseError;
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        RulesText::parse(&s)
+    }
+}
+
 impl TryFrom<&str> for CastingManaCost {
     type Error = ManaCostParseError;
     fn try_from(s: &str) -> Result<Self, Self::Error> {

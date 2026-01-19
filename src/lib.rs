@@ -14,6 +14,7 @@ pub use card::{
 pub use mana::{
     ActionCost, ActionCostProxy, CastingManaCost, CastingManaCostProxy, CastingManaSymbol,
     LoyaltyCost, LoyaltyCostProxy, LoyaltyValue, LoyaltyValueProxy, ManaCostParseError, ManaSymbol,
+    RulesText, RulesTextProxy, RulesTextSegment,
 };
 
 // Re-export renderer and rendering utilities

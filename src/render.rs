@@ -22,7 +22,8 @@ use crate::card::{
     SplitCard, TransformCard,
 };
 use crate::mana::{
-    ActionCost, CastingManaCost, CastingManaSymbol, LoyaltyCost, LoyaltyValue, ManaSymbol,
+    CastingManaCost, CastingManaSymbol, LoyaltyCost, LoyaltyValue, ManaSymbol, RulesText,
+    RulesTextSegment,
 };
 use anyhow::Result;
 use chromiumoxide::browser::{Browser, BrowserConfig};
@@ -187,7 +188,11 @@ pub fn render_casting_symbol(symbol: CastingManaSymbol) -> Markup {
         .unwrap_or_default()
         .join("mtgrender/client/src/assets");
 
-    let directory = if use_symbols_dir { "symbols" } else { "archives_symbols" };
+    let directory = if use_symbols_dir {
+        "symbols"
+    } else {
+        "archives_symbols"
+    };
     let url = format!(
         "file://{}/{}.svg",
         assets_base.join("img").join(directory).display(),
@@ -249,40 +254,18 @@ pub fn render_mana_cost(cost: &CastingManaCost) -> Markup {
 }
 
 /// Render rules text with inline mana symbols
+///
+/// This function takes a pre-parsed `RulesText` and renders each segment
+/// appropriately - text segments as plain text, symbol segments as images.
 #[must_use]
-pub fn render_rules_text(text: &str) -> Markup {
-    let mut parts = Vec::new();
-    let mut last_end = 0;
-
-    for (start, _) in text.match_indices('{') {
-        if let Some(end) = text[start..].find('}') {
-            let end = start + end;
-            if last_end < start {
-                parts.push(html! { (text[last_end..start]) });
-            }
-
-            let symbol_str = &text[start..end + 1];
-            if let Ok(cost) = ActionCost::parse(symbol_str) {
-                if let Some(symbol) = cost.symbols.first() {
-                    parts.push(render_mana_symbol(*symbol));
-                } else {
-                    parts.push(html! { (symbol_str) });
-                }
-            } else {
-                parts.push(html! { (symbol_str) });
-            }
-            last_end = end + 1;
-        }
-    }
-
-    if last_end < text.len() {
-        parts.push(html! { (text[last_end..]) });
-    }
-
+pub fn render_rules_text(rules: &RulesText) -> Markup {
     html! {
         div.rules-text-inner {
-            @for part in parts {
-                (part)
+            @for segment in &rules.segments {
+                @match segment {
+                    RulesTextSegment::Text(text) => (text),
+                    RulesTextSegment::Symbol(symbol) => (render_mana_symbol(*symbol)),
+                }
             }
         }
     }
@@ -532,7 +515,7 @@ pub fn generate_css() -> Markup {
                 color: #000;
                 margin-bottom: 12px;
             }
-            
+
             .rules-text-inner {
                 display: inline;
             }
@@ -1204,7 +1187,7 @@ impl RenderableCard for AdventureCard {
                                 div.adventure-cost { (render_mana_cost(&self.adventure.mana_cost)) }
                                 div.adventure-name { (&self.adventure.name) }
                                 div.adventure-type { (&self.adventure.type_line) }
-                                div.adventure-text { (&self.adventure.rules_text) }
+                                div.adventure-text { (render_rules_text(&self.adventure.rules_text)) }
                             }
                             div.adventure-right {
                                 div.card-header {

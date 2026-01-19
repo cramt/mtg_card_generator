@@ -26,7 +26,10 @@ fn test_parse_normal_creature() {
             Some("{G}".to_string())
         );
         assert_eq!(base.type_line, "Creature — Elf Druid");
-        assert_eq!(base.rules_text, Some("{T}: Add {G}.".to_string()));
+        assert_eq!(
+            base.rules_text.as_ref().map(|r| r.to_string()),
+            Some("{T}: Add {G}.".to_string())
+        );
         assert_eq!(
             base.flavor_text,
             Some("One bone broken for every twig snapped underfoot.".to_string())
@@ -209,7 +212,13 @@ fn test_parse_leveler() {
         assert_eq!(leveler.base.name, "Kargan Dragonlord");
         assert_eq!(leveler.leveler_ranges.len(), 3);
         assert_eq!(leveler.leveler_ranges[0].power, Some("2".to_string()));
-        assert_eq!(leveler.leveler_ranges[1].text, Some("Flying".to_string()));
+        assert_eq!(
+            leveler.leveler_ranges[1]
+                .text
+                .as_ref()
+                .map(|r| r.to_string()),
+            Some("Flying".to_string())
+        );
         assert!(leveler.leveler_ranges[2].text.is_some());
     } else {
         panic!("Expected Leveler variant");
