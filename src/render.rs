@@ -504,7 +504,7 @@ pub fn generate_css() -> Markup {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-size: cover;
+                background-size: 100% 100%;
                 z-index: 10;
                 pointer-events: none;
             }
@@ -995,7 +995,8 @@ impl RenderableCard for NormalCard {
                             div.type-line {
                                 div.type-text { (&self.base.type_line) }
                             }
-                            div class=(format!("text-box {}", classes.text_box_bg)) {
+                            div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
+                            div.text-box {
                                 @if let Some(ref rules) = self.base.rules_text {
                                     div.rules-text { (render_rules_text(rules)) }
                                 }
@@ -1200,7 +1201,8 @@ impl RenderableCard for AdventureCard {
                                 div.type-line {
                                     div.type-text { (&self.base.type_line) }
                                 }
-                                div class=(format!("text-box {}", classes.text_box_bg)) {
+                                div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
+                                div.text-box {
                                     @if let Some(ref rules) = self.base.rules_text {
                                         div.rules-text { (render_rules_text(rules)) }
                                     }
@@ -1301,7 +1303,8 @@ fn render_dfc_front_face(base: &CardBase, faces: &[CardFace]) -> Markup {
                                 @if let Some(ref type_line) = front_face.type_line { (type_line) }
                             }
                         }
-                        div class=(format!("text-box {}", classes.text_box_bg)) {
+                        div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
+                        div.text-box {
                             @if let Some(ref rules) = front_face.rules_text {
                                 div.rules-text { (render_rules_text(rules)) }
                             }
@@ -1370,7 +1373,8 @@ impl RenderableCard for BattleCard {
                             div.type-line {
                                 div.type-text { (&self.base.type_line) }
                             }
-                            div class=(format!("text-box {}", classes.text_box_bg)) {
+                            div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
+                            div.text-box {
                                 @if let Some(ref rules) = self.base.rules_text {
                                     div.rules-text { (render_rules_text(rules)) }
                                 }
