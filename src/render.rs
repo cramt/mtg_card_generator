@@ -148,46 +148,54 @@ pub fn derive_frame_color(mana_cost: &Option<CastingManaCost>) -> &'static str {
 /// Render a single casting mana symbol
 #[must_use]
 pub fn render_casting_symbol(symbol: CastingManaSymbol) -> Markup {
-    let scryfall_symbol = match symbol {
-        CastingManaSymbol::White => "W",
-        CastingManaSymbol::Blue => "U",
-        CastingManaSymbol::Black => "B",
-        CastingManaSymbol::Red => "R",
-        CastingManaSymbol::Green => "G",
-        CastingManaSymbol::Colorless => "C",
+    let (symbol_name, use_symbols_dir) = match symbol {
+        CastingManaSymbol::White => ("W", false),
+        CastingManaSymbol::Blue => ("U", false),
+        CastingManaSymbol::Black => ("B", false),
+        CastingManaSymbol::Red => ("R", false),
+        CastingManaSymbol::Green => ("G", false),
+        CastingManaSymbol::Colorless => ("C", true),
         CastingManaSymbol::Generic(n) => return html! { span.mana-generic { (n) } },
-        CastingManaSymbol::X => "X",
-        CastingManaSymbol::Y => "Y",
-        CastingManaSymbol::Z => "Z",
-        CastingManaSymbol::Snow => "S",
-        CastingManaSymbol::WhiteBlue => "WU",
-        CastingManaSymbol::WhiteBlack => "WB",
-        CastingManaSymbol::WhiteRed => "WR",
-        CastingManaSymbol::WhiteGreen => "WG",
-        CastingManaSymbol::BlueBlack => "UB",
-        CastingManaSymbol::BlueRed => "UR",
-        CastingManaSymbol::BlueGreen => "UG",
-        CastingManaSymbol::BlackRed => "BR",
-        CastingManaSymbol::BlackGreen => "BG",
-        CastingManaSymbol::RedGreen => "RG",
-        CastingManaSymbol::TwoWhite => "2W",
-        CastingManaSymbol::TwoBlue => "2U",
-        CastingManaSymbol::TwoBlack => "2B",
-        CastingManaSymbol::TwoRed => "2R",
-        CastingManaSymbol::TwoGreen => "2G",
-        CastingManaSymbol::PhyrexianWhite => "WP",
-        CastingManaSymbol::PhyrexianBlue => "UP",
-        CastingManaSymbol::PhyrexianBlack => "BP",
-        CastingManaSymbol::PhyrexianRed => "RP",
-        CastingManaSymbol::PhyrexianGreen => "GP",
+        CastingManaSymbol::X => ("X", true),
+        CastingManaSymbol::Y => ("Y", true),
+        CastingManaSymbol::Z => ("Z", true),
+        CastingManaSymbol::Snow => ("S", true),
+        CastingManaSymbol::WhiteBlue => ("WU", true),
+        CastingManaSymbol::WhiteBlack => ("WB", true),
+        CastingManaSymbol::WhiteRed => ("WR", true),
+        CastingManaSymbol::WhiteGreen => ("WG", true),
+        CastingManaSymbol::BlueBlack => ("UB", true),
+        CastingManaSymbol::BlueRed => ("UR", true),
+        CastingManaSymbol::BlueGreen => ("UG", true),
+        CastingManaSymbol::BlackRed => ("BR", true),
+        CastingManaSymbol::BlackGreen => ("BG", true),
+        CastingManaSymbol::RedGreen => ("RG", true),
+        CastingManaSymbol::TwoWhite => ("2W", true),
+        CastingManaSymbol::TwoBlue => ("2U", true),
+        CastingManaSymbol::TwoBlack => ("2B", true),
+        CastingManaSymbol::TwoRed => ("2R", true),
+        CastingManaSymbol::TwoGreen => ("2G", true),
+        CastingManaSymbol::PhyrexianWhite => ("WP", true),
+        CastingManaSymbol::PhyrexianBlue => ("UP", true),
+        CastingManaSymbol::PhyrexianBlack => ("BP", true),
+        CastingManaSymbol::PhyrexianRed => ("RP", true),
+        CastingManaSymbol::PhyrexianGreen => ("GP", true),
     };
 
+    // Get absolute path to mtgrender assets
+    let assets_base = std::env::current_dir()
+        .unwrap_or_default()
+        .join("mtgrender/client/src/assets");
+
+    let directory = if use_symbols_dir { "symbols" } else { "archives_symbols" };
     let url = format!(
-        "https://svgs.scryfall.io/card-symbols/{}.svg",
-        scryfall_symbol
+        "file://{}/{}.svg",
+        assets_base.join("img").join(directory).display(),
+        symbol_name
     );
+
     html! {
-        img.mana-symbol src=(url) alt=(scryfall_symbol);
+        img.mana-symbol src=(url) alt=(symbol_name);
     }
 }
 
@@ -197,19 +205,32 @@ pub fn render_mana_symbol(symbol: ManaSymbol) -> Markup {
     match symbol {
         ManaSymbol::Casting(s) => render_casting_symbol(s),
         ManaSymbol::Tap => {
-            let url = "https://svgs.scryfall.io/card-symbols/T.svg";
+            // Get absolute path to mtgrender assets
+            let assets_base = std::env::current_dir()
+                .unwrap_or_default()
+                .join("mtgrender/client/src/assets");
+            let url = format!("file://{}/img/symbols/T.svg", assets_base.display());
             html! { img.mana-symbol src=(url) alt="T"; }
         }
         ManaSymbol::Untap => {
-            let url = "https://svgs.scryfall.io/card-symbols/Q.svg";
+            let assets_base = std::env::current_dir()
+                .unwrap_or_default()
+                .join("mtgrender/client/src/assets");
+            let url = format!("file://{}/img/symbols/Q.svg", assets_base.display());
             html! { img.mana-symbol src=(url) alt="Q"; }
         }
         ManaSymbol::Energy => {
-            let url = "https://svgs.scryfall.io/card-symbols/E.svg";
+            let assets_base = std::env::current_dir()
+                .unwrap_or_default()
+                .join("mtgrender/client/src/assets");
+            let url = format!("file://{}/img/symbols/E.svg", assets_base.display());
             html! { img.mana-symbol src=(url) alt="E"; }
         }
         ManaSymbol::Chaos => {
-            let url = "https://svgs.scryfall.io/card-symbols/CHAOS.svg";
+            let assets_base = std::env::current_dir()
+                .unwrap_or_default()
+                .join("mtgrender/client/src/assets");
+            let url = format!("file://{}/img/symbols/CHAOS.svg", assets_base.display());
             html! { img.mana-symbol src=(url) alt="CHAOS"; }
         }
     }
@@ -979,7 +1000,6 @@ impl RenderableCard for NormalCard {
                 }
                 body {
                     div class=(format!("card {}", classes.bg)) {
-                        div class=(format!("text-box-bg {}", classes.text_box_bg)) {}
                         div.art-box { "[Art]" }
                         div class=(format!("card-frame {}", classes.frame)) {}
                         div.card-inner {
@@ -992,7 +1012,7 @@ impl RenderableCard for NormalCard {
                             div.type-line {
                                 div.type-text { (&self.base.type_line) }
                             }
-                            div.text-box {
+                            div class=(format!("text-box {}", classes.text_box_bg)) {
                                 @if let Some(ref rules) = self.base.rules_text {
                                     div.rules-text { (render_rules_text(rules)) }
                                 }
